@@ -370,172 +370,152 @@
         .overview-label {
             color: var(--light-gray);
             font-weight: 600;
-            font-size: 0.9rem;
-        }
-
-        /* Agenda List */
-        .agenda-list {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 1rem;
-        }
-
-        .agenda-item {
-            background: var(--white);
-            border-radius: 16px;
-            padding: 1.5rem;
-            box-shadow: var(--shadow-lg);
-            border: 1px solid var(--border-color);
-            transition: all 0.3s ease;
-            position: relative;
             overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+            height: 100%;
+            border-left: 4px solid var(--primary-color);
         }
 
-        .agenda-item:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-xl);
+        .agenda-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
         }
 
-        .agenda-header {
-            display: flex;
-            align-items: flex-start;
-            gap: 1rem;
-            margin-bottom: 1rem;
+        .agenda-card .card-body {
+            padding: 1.5rem;
         }
 
-        .agenda-thumbnail {
-            width: 60px;
-            height: 60px;
-            border-radius: 12px;
-            background: #e7f0ff;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #1d4ed8;
-            font-size: 1.5rem;
-            flex-shrink: 0;
-        }
-
-        .agenda-content {
-            flex: 1;
-        }
-
-        .agenda-title {
+        .agenda-card .card-title {
             font-size: 1.1rem;
-            font-weight: 700;
+            font-weight: 600;
             color: var(--dark-color);
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.75rem;
+            line-height: 1.4;
         }
 
-        .agenda-description {
+        .agenda-card .card-text {
             color: var(--light-gray);
             font-size: 0.9rem;
-            line-height: 1.5;
-            margin-bottom: 0.75rem;
+            margin-bottom: 1rem;
+            line-height: 1.6;
         }
 
         .agenda-meta {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            margin-bottom: 1rem;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px dashed #e2e8f0;
         }
 
         .meta-item {
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            margin-bottom: 0.5rem;
             color: var(--light-gray);
             font-size: 0.85rem;
         }
 
         .meta-item i {
+            width: 16px;
+            text-align: center;
+            margin-right: 0.5rem;
             color: var(--primary-color);
         }
 
-        .agenda-footer {
-            display: flex;
-            justify-content: flex-end;
-            align-items: center;
-        }
-
-
-        .agenda-actions {
-            display: flex;
-            gap: 0.5rem;
-        }
-
-        .action-btn {
-            width: 32px;
-            height: 32px;
-            border-radius: 8px;
-            border: none;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            transition: all 0.3s ease;
-            cursor: pointer;
-            font-size: 0.9rem;
-        }
-
-        .action-btn.view {
-            background: var(--accent-teal);
-        }
-
-        .action-btn.edit {
-            background: transparent;
-            color: var(--warning-color);
-            border: 1px solid rgba(245, 158, 11, 0.3);
-        }
-
-        .action-btn.edit:hover {
-            background: rgba(245, 158, 11, 0.1);
-        }
-
-        .action-btn.delete {
-            background: transparent;
-            color: var(--danger-color);
-            border: 1px solid rgba(239, 68, 68, 0.3);
-        }
-
-        .action-btn.delete:hover {
-            background: rgba(239, 68, 68, 0.1);
-        }
-
-        .action-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-md);
-        }
-
-
-        /* Empty State */
         .empty-state {
             text-align: center;
-            padding: 4rem 2rem;
-            color: var(--light-gray);
+            padding: 3rem 1.5rem;
+            background: white;
+            border-radius: 12px;
+            box-shadow: var(--shadow-sm);
         }
 
         .empty-state i {
-            font-size: 4rem;
-            margin-bottom: 1.5rem;
-            opacity: 0.3;
-            color: var(--primary-color);
+            font-size: 3rem;
+            color: var(--light-gray);
+            margin-bottom: 1rem;
+            opacity: 0.5;
         }
 
         .empty-state h4 {
             color: var(--dark-color);
-            margin-bottom: 1rem;
+            margin-bottom: 0.5rem;
             font-weight: 600;
         }
 
         .empty-state p {
             color: var(--light-gray);
-            margin-bottom: 2rem;
-            font-size: 1rem;
+            margin-bottom: 1.5rem;
         }
 
-        /* Add Button */
+        /* Top Bar */
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            background: white;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .page-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--dark-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .page-date {
+            color: var(--light-gray);
+            font-size: 0.9rem;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 1.1rem;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+            flex-shrink: 0;
+        }
+
+        .user-details {
+            display: flex;
+            flex-direction: column;
+            gap: 0.1rem;
+        }
+
+        .user-name {
+            color: var(--dark-color);
+            font-weight: 700;
+            font-size: 0.9rem;
+            margin: 0;
+        }
+
+        .user-role {
+            color: var(--light-gray);
+            font-weight: 500;
+            font-size: 0.8rem;
+        }
+
         .add-agenda-btn {
             background: linear-gradient(135deg, #3b82f6, #1d4ed8);
             color: white;
@@ -555,104 +535,6 @@
             box-shadow: var(--shadow-lg);
         }
 
-        /* New Agenda Button */
-        .new-agenda-btn {
-            background: var(--gradient-primary);
-            color: white;
-            border: none;
-            padding: 0.75rem 1.5rem;
-            border-radius: 12px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            margin-right: 1rem;
-        }
-
-        .new-agenda-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-lg);
-        }
-
-        /* Hamburger Menu */
-        .hamburger-menu{display:none;position:fixed;top:20px;left:20px;z-index:1100;width:50px;height:50px;background:rgba(255,255,255,0.95);border:none;border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,0.15);cursor:pointer;flex-direction:column;align-items:center;justify-content:center;gap:5px;transition:all 0.3s ease}
-        .hamburger-menu:hover{transform:scale(1.05);box-shadow:0 6px 16px rgba(0,0,0,0.2)}
-        .hamburger-menu span{display:block;width:24px;height:3px;background:#1e40af;border-radius:2px;transition:all 0.3s ease}
-        .hamburger-menu.active span:nth-child(1){transform:rotate(45deg) translate(7px,7px)}
-        .hamburger-menu.active span:nth-child(2){opacity:0}
-        .hamburger-menu.active span:nth-child(3){transform:rotate(-45deg) translate(7px,-7px)}
-
-        /* Responsive Design */
-        @media (max-width: 768px) {
-            .hamburger-menu{display:flex}
-            .sidebar {
-                transform: translateX(-100%);
-            }
-            .sidebar.active{
-                transform: translateX(0);
-            }
-            
-            .main-content {
-                margin-left: 0;
-                padding: 1rem;
-                padding-top: 80px;
-            }
-            
-            .welcome-content {
-                flex-direction: column;
-                text-align: center;
-                gap: 1rem;
-            }
-
-            .overview-grid {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 1rem;
-            }
-
-            .agenda-header {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-
-            .agenda-meta {
-                flex-direction: column;
-                gap: 0.5rem;
-            }
-
-            .agenda-footer {
-                justify-content: center;
-            }
-
-            .user-info {
-                flex-direction: column;
-                gap: 0.5rem;
-            }
-
-            .new-agenda-btn {
-                margin-right: 0;
-                margin-bottom: 0.5rem;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .overview-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .welcome-banner {
-                padding: 1.5rem;
-            }
-
-            .welcome-text h2 {
-                font-size: 1.5rem;
-            }
-
-            .agenda-item {
-                padding: 1rem;
-            }
-        }
     </style>
 </head>
 <body>
@@ -769,68 +651,77 @@
             </div>
             </div>
 
-        <!-- welcome banner removed as requested -->
-
-        <div class="d-flex justify-content-end mb-3">
-            <button class="add-agenda-btn" data-bs-toggle="modal" data-bs-target="#addAgendaModal"><i class="fas fa-plus"></i> Tambah Agenda</button>
-        </div>
-
         <!-- Agenda List -->
         <div class="agenda-list">
-                @if(isset($groupedAgendas) && $groupedAgendas->count() > 0)
-                    @foreach($groupedAgendas as $month => $items)
+            <div class="table-header d-flex justify-content-between align-items-center mb-3">
+                <h5 class="mb-0" style="font-weight: 700; color: var(--dark-color);">Daftar Agenda</h5>
+                <button class="new-category-btn" data-bs-toggle="modal" data-bs-target="#addAgendaModal">
+                    <i class="fas fa-plus"></i>
+                    <span>Tambah Agenda Baru</span>
+                </button>
+            </div>
+            
+            @if(isset($groupedAgendas) && $groupedAgendas->count() > 0)
+                @foreach($groupedAgendas as $month => $items)
+                    <div class="agenda-month-section">
+                        <h3 class="month-header">{{ $month }}</h3>
+                        <div class="row g-4">
                             @foreach($items as $item)
-                                <div class="agenda-item">
-                            <div class="agenda-header">
-                                <div class="agenda-thumbnail">
-                                    <i class="fas fa-calendar-alt"></i>
+                                <div class="col-12 col-md-6 col-xl-4">
+                                    <div class="agenda-card card h-100">
+                                        <div class="card-body">
+                                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                                <h5 class="card-title mb-0">{{ $item->judul }}</h5>
+                                                <span class="badge bg-{{ $item->status === 'aktif' ? 'success' : ($item->status === 'selesai' ? 'secondary' : 'warning') }}">
+                                                    {{ ucfirst($item->status) }}
+                                                </span>
                                             </div>
-                                <div class="agenda-content">
-                                    <h3 class="agenda-title">{{ $item->judul }}</h3>
+                                            
+                                            @if(!empty($item->deskripsi))
+                                                <p class="card-text text-muted small mb-3">{{ $item->deskripsi }}</p>
+                                            @endif
+                                            
                                             <div class="agenda-meta">
                                                 <div class="meta-item">
-                                            <i class="fas fa-calendar"></i>
-                                            <span>{{ \Carbon\Carbon::parse($item->tanggal)->translatedFormat('d F Y') }}</span>
+                                                    <i class="far fa-calendar"></i>
+                                                    <span>{{ \Carbon\Carbon::parse($item->tanggal)->translatedFormat('l, d F Y') }}</span>
                                                 </div>
                                                 <div class="meta-item">
-                                                    <i class="fas fa-clock"></i>
-                                                    <span>{{ $item->waktu ? \Carbon\Carbon::parse($item->waktu)->format('H:i') : 'Waktu TBD' }}</span>
+                                                    <i class="far fa-clock"></i>
+                                                    <span>{{ $item->waktu_mulai ?? '00:00' }} - {{ $item->waktu_selesai ?? '23:59' }}</span>
                                                 </div>
+                                                @if(!empty($item->tempat))
+                                                <div class="meta-item">
+                                                    <i class="fas fa-map-marker-alt"></i>
+                                                    <span>{{ $item->tempat }}</span>
+                                                </div>
+                                                @endif
+                                            </div>
+                                            
+                                            <div class="d-flex justify-content-end gap-2 mt-3 pt-2">
+                                                <button class="btn btn-sm btn-outline-primary edit-agenda" data-id="{{ $item->id }}" data-bs-toggle="modal" data-bs-target="#editAgendaModal">
+                                                    <i class="fas fa-edit fa-fw"></i>
+                                                </button>
+                                                <button class="btn btn-sm btn-outline-danger delete-agenda" data-id="{{ $item->id }}">
+                                                    <i class="fas fa-trash fa-fw"></i>
+                                                </button>
                                             </div>
                                         </div>
-                            </div>
-                            <div class="agenda-footer">
-                                <div class="agenda-actions">
-                                <button class="action-btn edit" title="Edit Agenda"
-                                        data-bs-toggle="modal"
-                                        data-bs-target="#addAgendaModal"
-                                        data-id="{{ $item->id }}"
-                                        data-judul="{{ $item->judul }}"
-                                        data-tanggal="{{ \Carbon\Carbon::parse($item->tanggal)->format('Y-m-d') }}"
-                                        data-waktu="{{ $item->waktu ? \Carbon\Carbon::parse($item->waktu)->format('H:i') : '' }}"
-                                        data-status="{{ $item->status }}">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                                    <form action="{{ route('admin.agenda.destroy', $item->id) }}" method="POST" style="display: inline;" onsubmit="return confirm('Apakah Anda yakin ingin menghapus agenda ini?')">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="action-btn delete" title="Hapus Agenda">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    </form>
+                                    </div>
                                 </div>
-                            </div>
-            </div>
                             @endforeach
-                    @endforeach
+                        </div>
+                    </div>
+                @endforeach
                 @else
-                    <div class="empty-state">
-                        <i class="fas fa-calendar-times"></i>
-                        <h4>Belum ada agenda</h4>
-                        <p>Mulai dengan menambahkan agenda pertama untuk kegiatan sekolah</p>
-                    <button type="button" class="add-agenda-btn" data-bs-toggle="modal" data-bs-target="#addAgendaModal">
-                        <i class="fas fa-plus"></i>
-                        Tambah Agenda Pertama
+                    <div class="empty-state py-5 my-4">
+                        <div class="mb-3">
+                            <i class="fas fa-calendar-alt fa-4x text-muted"></i>
+                        </div>
+                        <h4 class="h5 mb-2">Belum Ada Agenda</h4>
+                        <p class="text-muted mb-4">Mulai dengan menambahkan agenda pertama untuk kegiatan sekolah</p>
+                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addAgendaModal">
+                            <i class="fas fa-plus me-2"></i>Tambah Agenda Pertama
                         </button>
                     </div>
                 @endif
@@ -850,24 +741,47 @@
                 <div class="modal-body">
                     <form action="{{ route('admin.agenda.store') }}" method="POST" id="agendaForm">
                         @csrf
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold">Judul Agenda</label>
-                            <input type="text" name="judul" class="form-control" placeholder="Masukkan judul agenda" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold">Tanggal</label>
-                            <input type="date" name="tanggal" class="form-control" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold">Status</label>
-                            <select name="status" class="form-select">
-                                <option value="aktif">Aktif</option>
-                                <option value="draft">Draft</option>
-                                <option value="selesai">Selesai</option>
-                            </select>
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                <label class="form-label fw-semibold">Judul Agenda <span class="text-danger">*</span></label>
+                                <input type="text" name="judul" class="form-control" placeholder="Masukkan judul agenda" required>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-semibold">Tanggal <span class="text-danger">*</span></label>
+                                <input type="date" name="tanggal" class="form-control" required>
+                            </div>
+                            
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label fw-semibold">Waktu Mulai <span class="text-danger">*</span></label>
+                                <input type="time" name="waktu_mulai" class="form-control" required>
+                            </div>
+                            
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label fw-semibold">Waktu Selesai <span class="text-danger">*</span></label>
+                                <input type="time" name="waktu_selesai" class="form-control" required>
+                            </div>
+                            
+                            <div class="col-12 mb-3">
+                                <label class="form-label fw-semibold">Deskripsi</label>
+                                <textarea name="deskripsi" class="form-control" rows="3" placeholder="Masukkan deskripsi agenda"></textarea>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-semibold">Lokasi</label>
+                                <input type="text" name="lokasi" class="form-control" placeholder="Tempat pelaksanaan">
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-semibold">Status <span class="text-danger">*</span></label>
+                                <select name="status" class="form-select" required>
+                                    <option value="aktif">Aktif</option>
+                                    <option value="draft">Draft</option>
+                                    <option value="selesai">Selesai</option>
+                                </select>
+                            </div>
                         </div>
                         <!-- Hidden fields for other required data -->
-                        <input type="hidden" name="lokasi" value="">
                         <input type="hidden" name="kelas" value="">
                         <input type="hidden" name="tipe" value="">
                     </form>
@@ -878,6 +792,77 @@
                     </button>
                     <button type="submit" form="agendaForm" class="btn btn-primary">
                         <i class="fas fa-save me-2"></i>Simpan Agenda
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Edit Agenda Modal -->
+    <div class="modal fade" id="editAgendaModal" tabindex="-1" aria-labelledby="editAgendaModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header" style="background: white; color: #333; border-bottom: 1px solid #e5e7eb;">
+                    <h5 class="modal-title">
+                        <i class="fas fa-edit me-2"></i>Edit Agenda
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editAgendaForm" method="POST">
+                        @csrf
+                        @method('PUT')
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                <label class="form-label fw-semibold">Judul Agenda <span class="text-danger">*</span></label>
+                                <input type="text" name="judul" class="form-control" placeholder="Masukkan judul agenda" required>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-semibold">Tanggal <span class="text-danger">*</span></label>
+                                <input type="date" name="tanggal" class="form-control" required>
+                            </div>
+                            
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label fw-semibold">Waktu Mulai <span class="text-danger">*</span></label>
+                                <input type="time" name="waktu_mulai" class="form-control" required>
+                            </div>
+                            
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label fw-semibold">Waktu Selesai <span class="text-danger">*</span></label>
+                                <input type="time" name="waktu_selesai" class="form-control" required>
+                            </div>
+                            
+                            <div class="col-12 mb-3">
+                                <label class="form-label fw-semibold">Deskripsi</label>
+                                <textarea name="deskripsi" class="form-control" rows="3" placeholder="Masukkan deskripsi agenda"></textarea>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-semibold">Lokasi</label>
+                                <input type="text" name="lokasi" class="form-control" placeholder="Tempat pelaksanaan">
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-semibold">Status <span class="text-danger">*</span></label>
+                                <select name="status" class="form-select" required>
+                                    <option value="aktif">Aktif</option>
+                                    <option value="draft">Draft</option>
+                                    <option value="selesai">Selesai</option>
+                                </select>
+                            </div>
+                        </div>
+                        <!-- Hidden fields for other required data -->
+                        <input type="hidden" name="kelas" value="">
+                        <input type="hidden" name="tipe" value="">
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-2"></i>Batal
+                    </button>
+                    <button type="submit" form="editAgendaForm" class="btn btn-primary">
+                        <i class="fas fa-save me-2"></i>Simpan Perubahan
                     </button>
                 </div>
             </div>
@@ -986,7 +971,10 @@
                         // Reset form values
                         form.querySelector('input[name="judul"]').value = '';
                         form.querySelector('input[name="tanggal"]').value = '';
-                        form.querySelector('input[name="waktu"]').value = '';
+                        form.querySelector('input[name="waktu_mulai"]').value = '';
+                        form.querySelector('input[name="waktu_selesai"]').value = '';
+                        form.querySelector('textarea[name="deskripsi"]').value = '';
+                        form.querySelector('input[name="lokasi"]').value = '';
                         form.querySelector('select[name="status"]').value = 'aktif';
                         
                         // Set form action for new agenda
@@ -999,14 +987,102 @@
             });
 
             // Edit button wiring - optimized
-            document.querySelectorAll('.action-btn.edit').forEach(function(btn){
-                btn.addEventListener('click', function(e){
+            document.querySelectorAll('.edit-agenda').forEach(btn => {
+                btn.addEventListener('click', function(e) {
                     e.preventDefault();
                     
-                    // Get form elements once
-                    const form = document.getElementById('agendaForm');
-                    const modalTitle = document.getElementById('addAgendaModalLabel');
+                    const agendaId = this.dataset.id;
+                    const form = document.getElementById('editAgendaForm');
+                    form.action = `/admin/agenda/${agendaId}`;
                     
+                    // Get the card element that was clicked
+                    const card = this.closest('.card');
+                    
+                    // Populate the form with existing data
+                    form.querySelector('input[name="judul"]').value = card.querySelector('.card-title').textContent.trim();
+                    
+                    // Get date and time from the meta items
+                    const dateText = card.querySelector('.meta-item:first-child span').textContent.trim();
+                    const timeText = card.querySelectorAll('.meta-item')[1].querySelector('span').textContent.trim();
+                    
+                    // Format date for input[type="date"]
+                    const dateParts = dateText.split(' ');
+                    const months = {
+                        'Januari': '01', 'Februari': '02', 'Maret': '03', 'April': '04', 'Mei': '05', 'Juni': '06',
+                        'Juli': '07', 'Agustus': '08', 'September': '09', 'Oktober': '10', 'November': '11', 'Desember': '12'
+                    };
+                    const day = dateParts[1];
+                    const month = months[dateParts[2]];
+                    const year = dateParts[3];
+                    const formattedDate = `${year}-${month}-${day.padStart(2, '0')}`;
+                    
+                    form.querySelector('input[name="tanggal"]').value = formattedDate;
+                    
+                    // Format time for input[type="time"]
+                    const [startTime, endTime] = timeText.split(' - ');
+                    form.querySelector('input[name="waktu_mulai"]').value = startTime || '00:00';
+                    form.querySelector('input[name="waktu_selesai"]').value = endTime || '23:59';
+                    
+                    // Get description if it exists
+                    const descElement = card.querySelector('.card-text');
+                    if (descElement) {
+                        form.querySelector('textarea[name="deskripsi"]').value = descElement.textContent.trim();
+                    } else {
+                        form.querySelector('textarea[name="deskripsi"]').value = '';
+                    }
+                    
+                    // Get location if it exists
+                    const locationElement = Array.from(card.querySelectorAll('.meta-item')).find(el => 
+                        el.querySelector('.fa-map-marker-alt')
+                    );
+                    if (locationElement) {
+                        form.querySelector('input[name="lokasi"]').value = locationElement.querySelector('span').textContent.trim();
+                    } else {
+                        form.querySelector('input[name="lokasi"]').value = '';
+                    }
+                    
+                    // Set status
+                    const statusBadge = card.querySelector('.badge');
+                    if (statusBadge) {
+                        const status = statusBadge.textContent.trim().toLowerCase();
+                        form.querySelector('select[name="status"]').value = status;
+                    }
+                    
+                    // Show the edit modal
+                    const modal = new bootstrap.Modal(document.getElementById('editAgendaModal'));
+                    modal.show();
+                });
+            });
+            
+            // Delete button functionality
+            document.querySelectorAll('.delete-agenda').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    if (confirm('Apakah Anda yakin ingin menghapus agenda ini?')) {
+                        const agendaId = this.dataset.id;
+                        const form = document.createElement('form');
+                        form.method = 'POST';
+                        form.action = `/admin/agenda/${agendaId}`;
+                        
+                        const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+                        const methodInput = document.createElement('input');
+                        methodInput.type = 'hidden';
+                        methodInput.name = '_method';
+                        methodInput.value = 'DELETE';
+                        
+                        const csrfInput = document.createElement('input');
+                        csrfInput.type = 'hidden';
+                        csrfInput.name = '_token';
+                        csrfInput.value = csrfToken;
+                        
+                        form.appendChild(methodInput);
+                        form.appendChild(csrfInput);
+                        document.body.appendChild(form);
+                        form.submit();
+                    }
+                });
+            });
+            
                     // Fill values directly without recreating form
                     form.querySelector('input[name="judul"]').value = this.dataset.judul || '';
                     form.querySelector('input[name="tanggal"]').value = this.dataset.tanggal || '';

@@ -41,8 +41,10 @@ Route::get('/access', function () {
 Route::get('/gallery', [GalleryController::class, 'index'])->name('gallery.index');
 Route::get('/gallery/{id}', [GalleryController::class, 'show'])->name('gallery.show');
 
-// Gallery Pages
+// Home and Beranda routes (both point to the same controller method)
 Route::get('/beranda', [GalleryController::class, 'beranda'])->name('gallery.beranda');
+// Make sure the root URL also uses the same controller method
+Route::get('/', [GalleryController::class, 'beranda'])->name('home');
 Route::get('/galeri', [GalleryController::class, 'galeri'])->name('gallery.galeri');
 // Redirect my-bookmarks to user profile bookmarks tab
 Route::get('/my-bookmarks', function() {

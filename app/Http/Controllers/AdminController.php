@@ -106,7 +106,7 @@ class AdminController extends Controller
             'user_type' => 'admin'
         ]);
         
-        return redirect()->route('admin.dashboard')->with('success', 'Registrasi berhasil! Selamat datang.');
+        return redirect()->route('admin.petugas.index')->with('success', 'Registrasi berhasil! Data petugas telah ditambahkan.');
     }
 
     // Process login - KHUSUS ADMIN

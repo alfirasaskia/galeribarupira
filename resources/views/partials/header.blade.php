@@ -24,7 +24,41 @@
                     <li class="nav-item"><a class="nav-link" href="{{ route('gallery.galeri') }}">Galeri</a></li>
                     <li class="nav-item"><a class="nav-link" href="{{ route('gallery.agenda') }}">Agenda</a></li>
                     <li class="nav-item"><a class="nav-link" href="{{ url('/beranda#news') }}">Informasi</a></li>
-                    <li class="nav-item"><a class="btn btn-primary ms-2" href="{{ route('admin.login') }}">Login</a></li>
+                    @if(session('user_id') || session('admin_id'))
+                        <!-- User sudah login -->
+                        <div class="dropdown ms-2">
+                            <a href="#" class="d-flex align-items-center bg-light px-3 py-1 rounded-pill text-decoration-none profile-link dropdown-toggle" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false" style="transition: all 0.3s ease;">
+                                <i class="bi bi-person-circle me-2" style="font-size: 1.25rem;"></i>
+                                <span class="d-none d-md-inline">Profil Saya</span>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown" style="border: none; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); border-radius: 12px; overflow: hidden;">
+                                <li>
+                                    <a class="dropdown-item" href="{{ session('admin_id') ? route('admin.dashboard') : route('user.profile', ['id' => session('user_id')]) }}">
+                                        <i class="bi bi-person me-2"></i>Profil Saya
+                                    </a>
+                                </li>
+                                @if(session('admin_id'))
+                                    <li><a class="dropdown-item" href="{{ route('admin.dashboard') }}"><i class="bi bi-speedometer2 me-2"></i>Dashboard Admin</a></li>
+                                @endif
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <form action="{{ route('logout') }}" method="POST" class="d-inline">
+                                        @csrf
+                                        <button type="submit" class="dropdown-item text-danger">
+                                            <i class="bi bi-box-arrow-right me-2"></i>Logout
+                                        </button>
+                                    </form>
+                                </li>
+                            </ul>
+                        </div>
+                    @else
+                        <!-- Tombol Login -->
+                        <li class="nav-item">
+                            <a class="btn btn-primary ms-2" href="{{ route('admin.login') }}">
+                                <i class="bi bi-box-arrow-in-right me-1"></i> Login
+                            </a>
+                        </li>
+                    @endif
                 </ul>
             </div>
         </div>

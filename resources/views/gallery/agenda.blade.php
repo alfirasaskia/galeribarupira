@@ -187,98 +187,47 @@
             margin-top: 80px;
         }
         
-        /* Hero Section - Enhanced with decorative elements */
+        /* Hero Section - Original Design with Blue Border */
         .page-header {
             background: #1E40AF;
             color: #ffffff;
-            padding: 4rem 0 3rem;
+            padding: 3rem 0;
             position: relative;
             overflow: hidden;
             margin-top: 0;
             border: none;
-        }   
-        
-        .page-header::after {
-            display: none;
+            border-top: 4px solid #3B82F6;
         }
         
-        .page-header::before {
-            display: none;
-        }
-        
-        /* Floating decorative shapes */
+        /* Simplified decorative elements */
         .hero-decoration {
-            position: absolute;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.1);
-            pointer-events: none;
+            display: none;
         }
         
-        .hero-decoration:nth-child(1) {
-            width: 300px;
-            height: 300px;
-            top: -100px;
-            left: -100px;
-        }
         
-        .hero-decoration:nth-child(2) {
-            width: 200px;
-            height: 200px;
-            top: 50%;
-            right: -50px;
-        }
-        
-        .hero-decoration:nth-child(3) {
-            width: 150px;
-            height: 150px;
-            bottom: -50px;
-            left: 50%;
-        }
-        
-        /* Decorative icons on sides */
+        /* Hide decorative icons */
         .hero-icon-left,
         .hero-icon-right {
-            position: absolute;
-            font-size: 8rem;
-            color: rgba(255, 255, 255, 0.08);
-            pointer-events: none;
-        }
-        
-        .hero-icon-left {
-            left: -50px;
-            top: 50%;
-            transform: translateY(-50%) rotate(-15deg);
-        }
-        
-        .hero-icon-right {
-            right: -50px;
-            top: 50%;
-            transform: translateY(-50%) rotate(15deg);
-        }
-        
-        @media (max-width: 768px) {
-            .hero-icon-left,
-            .hero-icon-right {
-                display: none;
-            }
+            display: none;
         }
         
         .page-header .container {
             position: relative;
             z-index: 1;
+            text-align: center;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
         }
         
         .page-title {
-            font-size: 2.75rem;
+            font-size: 2.5rem;
             font-weight: 700;
-            margin-bottom: 0.85rem;
+            margin: 0 0 1rem 0;
             color: #ffffff;
-            letter-spacing: -0.5px;
             line-height: 1.2;
             position: relative;
-            z-index: 1;
-            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-            text-align: center;
+            display: inline-block;
         }
         
         .page-subtitle {
@@ -761,14 +710,6 @@
                             <i class="bi bi-calendar-event"></i>
                             <span>{{ $agendas->count() }} Agenda</span>
                         </div>
-                        <div class="hero-stat-item">
-                            <i class="bi bi-clock-history"></i>
-                            <span>Terupdate</span>
-                        </div>
-                        <div class="hero-stat-item">
-                            <i class="bi bi-star-fill"></i>
-                            <span>Terpercaya</span>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -833,15 +774,50 @@
                             }
                         @endphp
                         
-                        <div class="agenda-card {{ $agenda->tipe ?? 'default' }}" data-status="{{ $isUpcoming ? 'upcoming' : 'completed' }}" data-title="{{ strtolower($agenda->judul) }}">
+                        @php
+                            $tipe = $agenda->tipe ?? 'default';
+                            $judul = $agenda->judul ?? 'Judul Tidak Tersedia';
+                            $deskripsi = $agenda->deskripsi ?? null;
+                            $tanggal = $agenda->tanggal ?? now()->toDateString();
+                            $waktuMulai = $agenda->waktu_mulai ?? '00:00';
+                            $waktuSelesai = $agenda->waktu_selesai ?? '23:59';
+                            $keterangan = $agenda->keterangan ?? null;
+                        @endphp
+                        
+                        <div class="agenda-card {{ $tipe }}" data-status="{{ $isUpcoming ? 'upcoming' : 'completed' }}" data-title="{{ strtolower($judul) }}">
                             <div class="agenda-header">
                                 <div class="agenda-icon"><i class="{{ $icon }}"></i></div>
-                                <h4 class="agenda-title">{{ $agenda->judul }}</h4>
+                                <h4 class="agenda-title">{{ $judul }}</h4>
                             </div>
+                            @if(!empty($deskripsi))
+                                <div class="agenda-description">
+                                    <p>{{ $deskripsi }}</p>
+                                </div>
+                            @endif
                             <div class="agenda-meta">
-                                <span class="agenda-date"><i class="bi bi-calendar-event"></i>{{ $agenda->tanggal->translatedFormat('d F Y') }}</span>
-                                <span class="agenda-status {{ $statusClass }}">{{ $statusText }}</span>
+                                <div class="meta-item">
+                                    <i class="bi bi-calendar-event"></i>
+                                    <span>{{ \Carbon\Carbon::parse($tanggal)->translatedFormat('d F Y') }}</span>
+                                </div>
+                                <div class="meta-item">
+                                    <i class="bi bi-clock"></i>
+                                    <span>{{ $waktuMulai }} - {{ $waktuSelesai }}</span>
+                                </div>
+                                @if(!empty($agenda->lokasi))
+                                <div class="meta-item">
+                                    <i class="bi bi-geo-alt"></i>
+                                    <span>{{ $agenda->lokasi }}</span>
+                                </div>
+                                @endif
+                                <span class="agenda-status status-{{ $isUpcoming ? 'upcoming' : 'completed' }}">
+                                    {{ $isUpcoming ? 'Akan Datang' : 'Selesai' }}
+                                </span>
                             </div>
+                            @if(!empty($keterangan) && $keterangan !== $deskripsi)
+                                <div class="agenda-keterangan">
+                                    <p><strong>Keterangan:</strong> {{ $keterangan }}</p>
+                                </div>
+                            @endif
                         </div>
                     @endforeach
                 @else
@@ -852,8 +828,22 @@
                                 <div class="agenda-icon"><i class="bi bi-calendar-event"></i></div>
                                 <h4 class="agenda-title">{{ $data['title'] }}</h4>
                             </div>
+                            @if(isset($data['description']) && $data['description'])
+                                <div class="agenda-description">
+                                    <p>{{ $data['description'] }}</p>
+                                </div>
+                            @endif
                             <div class="agenda-meta">
-                                <span class="agenda-date"><i class="bi bi-calendar-event"></i>TBD</span>
+                                <div class="meta-item">
+                                    <i class="bi bi-calendar-event"></i>
+                                    <span>TBD</span>
+                                </div>
+                                @if(isset($data['time']) && $data['time'])
+                                <div class="meta-item">
+                                    <i class="bi bi-clock"></i>
+                                    <span>{{ $data['time'] }}</span>
+                                </div>
+                                @endif
                                 <span class="agenda-status status-upcoming">Akan Datang</span>
                             </div>
                         </div>

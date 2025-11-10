@@ -67,6 +67,70 @@
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             height: 80px;
         }
+        
+        /* Style for auth buttons */
+        .auth-btn {
+            padding: 0.4rem 1rem !important;
+            font-size: 0.85rem !important;
+            border-radius: 6px !important;
+            transition: all 0.3s ease !important;
+            font-weight: 500 !important;
+            height: 36px;
+            display: flex !important;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .auth-btn i {
+            font-size: 0.9rem !important;
+            margin-right: 0.3rem;
+        }
+        
+        .btn-outline-primary {
+            border-color: rgba(255, 255, 255, 0.7) !important;
+            color: white !important;
+            background: transparent !important;
+        }
+        
+        .btn-outline-primary:hover {
+            background: rgba(255, 255, 255, 0.15) !important;
+            border-color: white !important;
+        }
+        
+        .btn-primary {
+            background: rgba(255, 255, 255, 0.9) !important;
+            color: #0d6efd !important;
+            border: 1px solid rgba(255, 255, 255, 0.9) !important;
+            transition: all 0.3s ease !important;
+        }
+        
+        .btn-primary:hover {
+            background: white !important;
+            color: #0a58ca !important;
+        }
+        
+        /* Scrolled state */
+        .navbar.scrolled .btn-outline-primary {
+            border-color: #0d6efd !important;
+            color: #0d6efd !important;
+            background: transparent !important;
+        }
+        
+        .navbar.scrolled .btn-outline-primary:hover {
+            background: rgba(13, 110, 253, 0.1) !important;
+        }
+        
+        .navbar.scrolled .btn-primary {
+            background: transparent !important;
+            color: white !important;
+            border-color: rgba(255, 255, 255, 0.7) !important;
+            transition: all 0.3s ease !important;
+        }
+        
+        .navbar.scrolled .btn-primary:hover {
+            background: rgba(255, 255, 255, 0.15) !important;
+            border-color: white !important;
+        }
 
         .navbar.scrolled {
             background: rgba(255, 255, 255, 0.95) !important;
@@ -3354,9 +3418,14 @@
                         </div>
                     @else
                         <!-- User belum login -->
-                        <a href="{{ route('login') }}" class="btn btn-primary d-flex align-items-center navbar-login-btn">
-                            <i class="bi bi-person-shield me-2"></i>Login
-                        </a>
+                        <div class="d-flex align-items-center gap-2">
+                            <a href="{{ route('register') }}" class="btn btn-outline-primary auth-btn">
+                                <i class="bi bi-person-plus"></i>Daftar
+                            </a>
+                            <a href="{{ route('login') }}" class="btn btn-primary auth-btn">
+                                <i class="bi bi-box-arrow-in-right"></i>Login
+                            </a>
+                        </div>
                     @endif
                 </div>
             </div>
@@ -3902,6 +3971,26 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
+        // Navbar scroll effect
+        document.addEventListener('DOMContentLoaded', function() {
+            const navbar = document.querySelector('.navbar');
+            const scrollThreshold = 50; // pixels to scroll before adding scrolled class
+            
+            function handleScroll() {
+                if (window.scrollY > scrollThreshold) {
+                    navbar.classList.add('scrolled');
+                } else {
+                    navbar.classList.remove('scrolled');
+                }
+            }
+            
+            // Initial check in case page is loaded with scroll position
+            handleScroll();
+            
+            // Add scroll event listener
+            window.addEventListener('scroll', handleScroll);
+        });
+        
         // reCAPTCHA v3 - Auto execute on page load
         grecaptcha.ready(function() {
             console.log('reCAPTCHA v3 loaded successfully');
