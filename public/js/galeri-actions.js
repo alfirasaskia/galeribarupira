@@ -195,14 +195,14 @@ window.handlePhotoOptions = function(fotoId, event) {
         return false;
     }
     
-    // Show options menu
+    // Show options menu: only 'Laporkan Foto'
     if (typeof Swal !== 'undefined') {
         Swal.fire({
             title: '<i class="bi bi-three-dots-vertical"></i> Opsi Foto',
-            html: '<button class="btn btn-outline-dark w-100 mb-2" onclick="Swal.close();"><i class="bi bi-download me-2"></i>Download Foto</button><button class="btn btn-outline-danger w-100 mb-3" onclick="Swal.close();"><i class="bi bi-flag-fill me-2"></i>Laporkan Foto</button><button class="btn btn-outline-secondary w-100" onclick="Swal.close();">Batal</button>',
+            html: '<button class="btn btn-outline-danger w-100" onclick="Swal.close();"><i class="bi bi-flag-fill me-2"></i>Laporkan Foto</button>',
             showConfirmButton: false,
             showCancelButton: false,
-            width: '350px'
+            width: '320px'
         });
     }
     return false;

@@ -292,9 +292,9 @@
         /* Ensure gallery cards are visible by default */
         .gallery-card { opacity: 1; transform: translateY(0); }
             
-            /* Hero section untuk user yang sudah login - warna sama dengan navbar */
+            /* Hero section */
             .page-header {
-            background: #1E40AF;
+            background: #1E3A8A; /* rgb(30, 58, 138) */
             color: white;
             padding: 3.5rem 0 2.5rem;
             text-align: center;
@@ -312,13 +312,55 @@
             overflow: hidden;
             }
             
-            /* Clean background untuk logged-in user - no decorations */
+            /* Decorative soft blobs */
             .page-header::before {
-                display: none;
+                content: '';
+                position: absolute;
+                top: -80px;
+                right: -120px;
+                width: 360px;
+                height: 360px;
+                background: radial-gradient(closest-side, rgba(255,255,255,0.25), rgba(255,255,255,0) 70%);
+                filter: blur(4px);
+                opacity: 0.25;
+                transform: rotate(8deg);
             }
             
             .page-header::after {
-                display: none;
+                content: '';
+                position: absolute;
+                bottom: -100px;
+                left: -120px;
+                width: 420px;
+                height: 420px;
+                background: radial-gradient(closest-side, rgba(59,130,246,0.25), rgba(59,130,246,0) 70%);
+                filter: blur(8px);
+                opacity: 0.25;
+            }
+
+            /* Subtle star field overlay */
+            .page-header .container { position: relative; z-index: 1; }
+            .page-header .container::before,
+            .page-header .container::after {
+                content: '';
+                position: absolute;
+                inset: -20px; /* slightly larger than container */
+                background-image:
+                    radial-gradient(circle, rgba(255,255,255,0.25) 1px, transparent 1px),
+                    radial-gradient(circle, rgba(255,255,255,0.18) 1px, transparent 1px),
+                    radial-gradient(circle, rgba(255,255,255,0.12) 1px, transparent 1px);
+                background-size: 90px 90px, 120px 120px, 150px 150px;
+                background-position: 10px 20px, 40px 60px, 75px 30px;
+                pointer-events: none;
+                z-index: 0;
+                opacity: 0.3;
+                animation: twinkle 6s ease-in-out infinite;
+            }
+            .page-header .container::after {
+                background-position: 60px 40px, 100px 20px, 130px 90px;
+                opacity: 0.2;
+                animation-duration: 8s;
+                animation-direction: alternate;
             }
             
             @keyframes float {
@@ -371,9 +413,9 @@
                 display: none;
             }
             
-            /* Hero section untuk user yang belum login - SAMA UKURANNYA */
+            /* Guest mode uses same enhanced gradient */
             .page-header.guest-mode {
-                background: #1E40AF;
+                background: #1E3A8A; /* rgb(30, 58, 138) */
                 color: white;
                 padding: 3.5rem 0 2.5rem;
                 box-shadow: 0 10px 40px rgba(30, 64, 175, 0.25);
@@ -1383,6 +1425,22 @@
             pointer-events: auto;
         }
 
+        /* Description pill inside gallery card */
+        .gallery-description {
+            background: rgba(37, 99, 235, 0.04);
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 0.75rem 0.9rem;
+            margin: 0.5rem 0 0.25rem;
+            color: #475569;
+            line-height: 1.5;
+        }
+        .gallery-description-text {
+            margin: 0;
+            white-space: normal;
+            word-break: break-word;
+        }
+
         /* Gallery Stats */
         .gallery-stats {
             display: flex;
@@ -1736,14 +1794,6 @@
     <div class="main-content">
         <!-- Page Header -->
         <div class="page-header" id="pageHeader">
-            <!-- Welcome Badge untuk user yang login -->
-            @if(session('user_id'))
-            <div class="welcome-badge">
-                <i class="bi bi-person-circle"></i>
-                <span>Selamat datang, {{ session('user_name') }}!</span>
-            </div>
-            @endif
-            
             <div class="container">
                 <h1 class="page-title" id="heroTitle" data-aos="fade-down">Galeri Foto SMKN 4 Bogor</h1>
                 <p class="page-subtitle" id="heroSubtitle" data-aos="fade-up" data-aos-delay="100">Dokumentasi kegiatan, prestasi, dan momen berharga dalam perjalanan pendidikan kami</p>
@@ -1785,12 +1835,10 @@
             </div>
         </div>
 
-
         <!-- Photo Grid -->
             <div class="gallery-grid" id="galleryGrid">
             @if(isset($fotos) && $fotos->count() > 0)
                 @foreach($fotos as $index => $foto)
-                    <div class="gallery-card sa-show" data-category="{{ $foto->kategori_nama ?? 'Tanpa Kategori' }}" data-foto-id="{{ $foto->id }}" data-aos="fade-up" data-aos-delay="{{ ($index % 12) * 50 }}">
                         @php
                             // Try different path variations for compatibility
                             $imagePath = '';
@@ -1821,6 +1869,7 @@
                                 }
                             }
                         @endphp
+                    <div class="gallery-card sa-show" data-category="{{ $foto->kategori_nama ?? 'Tanpa Kategori' }}" data-foto-id="{{ $foto->id }}" data-judul="{{ e($foto->judul ?? 'Foto') }}" data-image-url="{{ $imagePath }}" data-aos="fade-up" data-aos-delay="{{ ($index % 12) * 50 }}">
                         <div class="gallery-media">
                             @if($imagePath)
                                 <img src="{{ $imagePath }}" 
@@ -1901,9 +1950,6 @@
                                     </button>
                                     <button class="action-btn comment-btn" data-foto-id="{{ $foto->id }}" data-action="comment" title="Komentar" style="pointer-events: auto !important;">
                                         <i class="bi bi-chat" style="pointer-events: none !important;"></i>
-                                    </button>
-                                    <button class="action-btn share-btn" data-foto-id="{{ $foto->id }}" data-action="share" data-judul="{{ e($foto->judul) }}" data-file-url="{{ asset('storage/' . $foto->file_path) }}" title="Bagikan" style="pointer-events: auto !important;">
-                                        <i class="bi bi-share" style="pointer-events: none !important;"></i>
                                     </button>
                                 </div>
                                 <button class="action-btn bookmark-btn" data-foto-id="{{ $foto->id }}" data-action="bookmark" title="Simpan" style="pointer-events: auto !important;">
@@ -2595,10 +2641,10 @@
                             return;
                         }
                         
-                        // Click on photo area - could open modal here if needed
+                        // Click pada area foto (tanpa membuka modal)
                         console.log('Click on photo area');
-                        // TODO: Add photo modal if needed
-                    });
+                        return;
+                    })
                 }
             });
             

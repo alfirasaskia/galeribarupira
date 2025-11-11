@@ -186,40 +186,13 @@
         </div>
 
         <!-- Photos Grid -->
-        <!-- Debug Info -->
         <div class="photos-grid" id="photosGrid">
                 @if($photos && $photos->count() > 0)
                         @foreach($photos as $photo)
                                 <div class="photo-card">
                         <div class="photo-thumbnail">
                                     @if($photo->file_path)
-                                        @php
-                                            // Try different path variations
-                                            $imagePath = '';
-                                            if (file_exists(public_path('storage/' . $photo->file_path))) {
-                                                $imagePath = asset('storage/' . $photo->file_path);
-                                            } elseif (file_exists(public_path($photo->file_path))) {
-                                                $imagePath = asset($photo->file_path);
-                                            } elseif (file_exists(storage_path('app/public/' . $photo->file_path))) {
-                                                $imagePath = asset('storage/' . $photo->file_path);
-                                            } else {
-                                                // Try without 'photos/' prefix
-                                                $pathWithoutPrefix = str_replace('photos/', '', $photo->file_path);
-                                                if (file_exists(public_path('storage/photos/' . $pathWithoutPrefix))) {
-                                                    $imagePath = asset('storage/photos/' . $pathWithoutPrefix);
-                                                } elseif (file_exists(public_path('photos/' . $pathWithoutPrefix))) {
-                                                    $imagePath = asset('photos/' . $pathWithoutPrefix);
-                                                }
-                                            }
-                                        @endphp
-                                        @if($imagePath)
-                                            <img src="{{ $imagePath }}" alt="{{ $photo->judul ?? 'Foto' }}" onerror="this.parentElement.innerHTML='<div class=\'d-flex w-100 h-100 align-items-center justify-content-center text-muted\' style=\'background:#f1f5f9\'><i class=\'fas fa-image fa-2x\'></i><small style=\'display:block;margin-top:5px;font-size:10px;\'>{{ $photo->file_path }}</small></div>'">
-                                        @else
-                                            <div class="d-flex w-100 h-100 align-items-center justify-content-center text-muted flex-column" style="background:#f1f5f9">
-                                                <i class="fas fa-image fa-2x"></i>
-                                                <small style="margin-top:5px;font-size:10px;color:#999;">{{ $photo->file_path }}</small>
-                                            </div>
-                                        @endif
+                                        <img src="{{ asset('storage/' . $photo->file_path) }}" alt="{{ $photo->judul ?? 'Foto' }}" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'; this.parentElement.innerHTML='<div class=\'d-flex w-100 h-100 align-items-center justify-content-center text-muted flex-column\' style=\'background:#f1f5f9\'><i class=\'fas fa-image fa-2x\'></i><small style=\'margin-top:5px;font-size:10px;color:#999;\'>{{ $photo->file_path }}</small></div>'">
                                     @else
                                 <div class="d-flex w-100 h-100 align-items-center justify-content-center text-muted" style="background:#f1f5f9">
                                     <i class="fas fa-image fa-2x"></i>
@@ -240,7 +213,7 @@
                                                     data-photo-id="{{ $photo->id }}"
                                                     data-photo-title="{{ htmlspecialchars($photo->judul ?? 'Foto Tanpa Judul') }}"
                                                     data-photo-description="{{ htmlspecialchars($photo->deskripsi ?? 'Tidak ada deskripsi') }}"
-                                                    data-photo-image="{{ asset('storage/' . $photo->file_path) }}"
+                                                    data-photo-image="{{ asset('storage/' . $photo->file_path) }}?t={{ time() }}"
                                                     data-photo-category="{{ htmlspecialchars($photo->kategori_nama ?? 'Tanpa Kategori') }}"
                                         data-photo-date="{{ $photo->created_at ?? 'N/A' }}">
                                     <i class="fas fa-eye"></i>
@@ -308,6 +281,19 @@
     <script>
         const baseEditUrl = "{{ url('admin/photos') }}/";
         const baseDeleteUrl = "{{ url('admin/photos') }}/";
+        
+        // Debug: Log all image sources
+        console.log('=== Photo Debug Info ===');
+        document.querySelectorAll('.photo-thumbnail img').forEach((img, index) => {
+            console.log(`Image ${index + 1}:`, {
+                src: img.src,
+                alt: img.alt,
+                complete: img.complete,
+                naturalWidth: img.naturalWidth,
+                naturalHeight: img.naturalHeight
+            });
+        });
+        
         // Photo preview
         const photoInput=document.getElementById('photoInput');
         if(photoInput){photoInput.addEventListener('change',function(e){const f=e.target.files[0];if(!f){document.getElementById('photoPreview').style.display='none';return;}const r=new FileReader();r.onload=function(ev){document.getElementById('previewImage').src=ev.target.result;document.getElementById('photoPreview').style.display='block';};r.readAsDataURL(f);});}

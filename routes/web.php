@@ -249,6 +249,7 @@ Route::middleware(['check.admin'])->group(function () {
     Route::delete('/admin/photos/{id}', [AdminController::class, 'photosDelete'])->name('admin.photos.delete');
 
     Route::post('/admin/agenda', [AdminController::class, 'agendaStore'])->name('admin.agenda.store');
+    Route::get('/admin/agenda/{id}', [AdminController::class, 'agendaShow'])->name('admin.agenda.show');
     Route::put('/admin/agenda/{id}', [AdminController::class, 'agendaUpdate'])->name('admin.agenda.update');
     Route::post('/admin/agenda/{id}/toggle-status', [AdminController::class, 'agendaToggleStatus'])->name('admin.agenda.toggleStatus');
     Route::delete('/admin/agenda/{id}', [AdminController::class, 'agendaDestroy'])->name('admin.agenda.destroy');

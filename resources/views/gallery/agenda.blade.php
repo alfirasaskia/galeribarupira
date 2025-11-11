@@ -187,28 +187,78 @@
             margin-top: 80px;
         }
         
-        /* Hero Section - Original Design with Blue Border */
+        /* Hero Section - Luxury Design */
         .page-header {
-            background: #1E40AF;
+            background: linear-gradient(135deg, #1E40AF 0%, #1e3a8a 50%, #1a3a7a 100%);
             color: #ffffff;
-            padding: 3rem 0;
+            padding: 4rem 0;
             position: relative;
             overflow: hidden;
             margin-top: 0;
             border: none;
-            border-top: 4px solid #3B82F6;
+            border-top: 4px solid #1E40AF;
+            box-shadow: 0 10px 40px rgba(30, 64, 175, 0.3);
         }
         
-        /* Simplified decorative elements */
+        /* Decorative animated background elements */
         .hero-decoration {
-            display: none;
+            position: absolute;
+            border-radius: 50%;
+            opacity: 0.1;
+            animation: float 6s ease-in-out infinite;
         }
         
+        .hero-decoration:nth-child(1) {
+            width: 300px;
+            height: 300px;
+            background: #ffffff;
+            top: -100px;
+            right: -100px;
+            animation-delay: 0s;
+        }
         
-        /* Hide decorative icons */
+        .hero-decoration:nth-child(2) {
+            width: 200px;
+            height: 200px;
+            background: #3B82F6;
+            bottom: -50px;
+            left: -50px;
+            animation-delay: 2s;
+        }
+        
+        .hero-decoration:nth-child(3) {
+            width: 150px;
+            height: 150px;
+            background: #60A5FA;
+            top: 50%;
+            right: 10%;
+            animation-delay: 4s;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(20px); }
+        }
+        
+        /* Decorative icons */
         .hero-icon-left,
         .hero-icon-right {
-            display: none;
+            position: absolute;
+            font-size: 4rem;
+            opacity: 0.08;
+            color: #ffffff;
+        }
+        
+        .hero-icon-left {
+            top: 20px;
+            left: 30px;
+            animation: float 8s ease-in-out infinite;
+        }
+        
+        .hero-icon-right {
+            bottom: 20px;
+            right: 30px;
+            animation: float 8s ease-in-out infinite 2s;
         }
         
         .page-header .container {
@@ -301,9 +351,9 @@
 
         .agenda-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2rem;
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
             width: 100%;
         }
 
@@ -312,62 +362,70 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            gap: 1rem;
-            margin-bottom: 1rem;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
             flex-wrap: wrap;
+            padding: 1.5rem 0;
+            border-bottom: 2px solid #f1f5f9;
         }
 
         .agenda-tabs {
-            background: #f1f5f9;
+            background: linear-gradient(135deg, #f1f5f9 0%, #e5e7eb 100%);
             border-radius: 999px;
-            padding: 5px;
+            padding: 6px;
             display: inline-flex;
-            gap: 4px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            gap: 6px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(229, 231, 235, 0.5);
         }
 
         .agenda-tab {
             border: 0;
             background: transparent;
-            padding: 0.6rem 1.2rem;
+            padding: 0.7rem 1.4rem;
             border-radius: 999px;
             font-weight: 600;
-            color: #475569;
+            color: #64748b;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-size: 0.95rem;
         }
 
         .agenda-tab:hover {
-            background: rgba(255, 255, 255, 0.5);
+            background: rgba(255, 255, 255, 0.7);
             color: var(--primary-blue);
+            transform: translateY(-1px);
         }
 
         .agenda-tab.active {
-            background: #ffffff;
+            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
             color: var(--primary-blue);
-            box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+            font-weight: 700;
         }
 
         .agenda-search { 
             position: relative; 
-            flex: 1 1 260px; 
-            max-width: 420px; 
+            flex: 1 1 280px; 
+            max-width: 450px; 
         }
         
         .agenda-search input { 
             width: 100%; 
-            border: 1px solid #e5e7eb; 
-            border-radius: 14px; 
-            padding: 0.7rem 2.2rem 0.7rem 2.6rem; 
+            border: 2px solid #e5e7eb; 
+            border-radius: 18px; 
+            padding: 0.8rem 2.4rem 0.8rem 2.8rem; 
             outline: none; 
-            box-shadow: 0 2px 4px rgba(0,0,0,0.04);
-            transition: all 0.2s ease;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+            transition: all 0.3s ease;
             font-size: 0.95rem;
+            background: #ffffff;
         }
         
         .agenda-search input:focus {
             border-color: var(--primary-blue);
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15);
+            background: #f8fafc;
         }
         
         .agenda-search .bi-search { 
@@ -381,67 +439,85 @@
         
         .agenda-card {
             background: #ffffff;
-            border-radius: 20px;
+            border-radius: 24px;
             overflow: hidden;
-            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             border: 1px solid rgba(229, 231, 235, 0.6);
             position: relative;
             cursor: pointer;
             display: flex;
             flex-direction: column;
-            padding: 1.8rem;
+            padding: 2rem;
             width: 100%;
             margin: 0;
-            min-height: 200px;
+            min-height: 240px;
+            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+        }
+        
+        .agenda-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 0px;
+            background: transparent;
+            border-radius: 24px 24px 0 0;
         }
         
         .agenda-card:hover {
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-            transform: translateY(-4px);
-            border-color: rgba(30, 64, 175, 0.2);
+            box-shadow: 0 12px 32px rgba(37, 99, 235, 0.15);
+            transform: translateY(-6px);
+            border-color: rgba(30, 64, 175, 0.3);
         }
 
         .agenda-card:active {
-            transform: translateY(-2px) scale(0.98);
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+            transform: translateY(-3px) scale(0.99);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
             transition: all 0.1s ease;
         }
         
         .agenda-header {
             display: flex;
             align-items: flex-start;
-            gap: 1rem;
+            gap: 1.2rem;
             width: 100%;
             flex: 1;
-            margin-bottom: 1rem;
+            margin-bottom: 1.2rem;
         }
 
         .agenda-icon {
-            width: 56px;
-            height: 56px;
-            border-radius: 16px;
-            background: #f0f7ff;
+            width: 64px;
+            height: 64px;
+            border-radius: 18px;
+            background: linear-gradient(135deg, #f0f7ff 0%, #e0efff 100%);
             display: grid;
             place-items: center;
-            font-size: 1.6rem;
+            font-size: 1.8rem;
             color: var(--primary-blue);
             flex-shrink: 0;
-            border: none;
-            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.1);
+            border: 2px solid rgba(37, 99, 235, 0.15);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.12);
+            transition: all 0.3s ease;
+        }
+        
+        .agenda-card:hover .agenda-icon {
+            transform: scale(1.08) rotate(5deg);
+            box-shadow: 0 6px 16px rgba(37, 99, 235, 0.2);
         }
         
         .agenda-title {
-            font-size: 1.15rem;
+            font-size: 1.2rem;
             font-weight: 700;
             color: #1a202c;
-            line-height: 1.5;
+            line-height: 1.4;
             text-align: left;
             word-wrap: break-word;
             overflow-wrap: break-word;
             margin: 0;
             flex: 1;
-            letter-spacing: -0.2px;
+            letter-spacing: -0.3px;
         }
         
         .agenda-meta {
@@ -450,46 +526,90 @@
             justify-content: space-between;
             gap: 1rem;
             margin-top: auto;
-            padding-top: 1rem;
-            border-top: 1px solid #f1f5f9;
+            padding-top: 1.2rem;
+            border-top: 1px solid #e5e7eb;
+            flex-wrap: wrap;
+        }
+
+        /* Baris meta agar rapi dan sejajar */
+        .meta-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #475569;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        .meta-item i {
+            color: #1E40AF;
+        }
+
+        /* Lokasi boleh membungkus baris agar tidak terpotong */
+        .meta-item.location {
+            white-space: normal;
+            word-break: break-word;
+            flex: 1 1 240px;
+            line-height: 1.3;
+        }
+
+        /* Pastikan badge status terdorong ke kanan */
+        .agenda-status {
+            margin-left: auto;
         }
         
         .agenda-status {
-            padding: 0.4rem 1rem;
-            border-radius: 12px;
-            font-size: 0.7rem;
+            padding: 0.5rem 1.2rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
             font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.6px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .agenda-card:hover .agenda-status {
+            transform: scale(1.05);
         }
         
         .status-upcoming {
-            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            background: linear-gradient(90deg, #3b82f6 0%, #2563eb 100%);
             color: white;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
         }
         
         .status-ongoing {
             background: linear-gradient(135deg, #10b981 0%, #059669 100%);
             color: white;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
         }
         
         .status-completed {
-            background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+            background: linear-gradient(90deg, #9ca3af 0%, #6b7280 50%, #4b5563 100%);
             color: white;
+            box-shadow: 0 4px 12px rgba(107, 114, 128, 0.3);
         }
         
         .agenda-date {
-            font-size: 0.85rem;
-            color: #64748b;
+            font-size: 0.9rem;
+            color: #475569;
             font-weight: 600;
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 0.6rem;
+            padding: 0.4rem 0.8rem;
+            background: rgba(37, 99, 235, 0.05);
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+        
+        .agenda-card:hover .agenda-date {
+            background: rgba(37, 99, 235, 0.1);
         }
         
         .agenda-date i {
             color: #1E40AF;
-            font-size: 1rem;
+            font-size: 1.1rem;
         }
         
         .agenda-actions {
@@ -586,7 +706,7 @@
             }
             
             .page-header {
-                padding: 2.5rem 1.5rem;
+                padding: 3rem 1.5rem;
                 margin-bottom: 1.5rem;
                 border-radius: 0 0 30px 30px;
             }
@@ -602,13 +722,51 @@
                 padding: 1.5rem;
             }
             
-            .agenda-card { 
-                min-height: 180px !important; 
-                padding: 1.25rem;
-                border-radius: 18px;
+            .agenda-grid {
+                grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+                gap: 1.5rem;
             }
-            .agenda-header { margin-bottom: 1rem; flex: 1; min-height: 60px; }
-            .agenda-meta { margin-top: auto; min-height: 20px; }
+            
+            .agenda-card { 
+                min-height: 220px !important; 
+                padding: 1.5rem;
+                border-radius: 20px;
+            }
+            
+            .agenda-header { 
+                margin-bottom: 1rem; 
+                flex: 1; 
+                min-height: 60px; 
+            }
+            
+            .agenda-icon {
+                width: 56px;
+                height: 56px;
+                font-size: 1.5rem;
+            }
+            
+            .agenda-title {
+                font-size: 1.1rem;
+            }
+            
+            .agenda-meta { 
+                margin-top: auto; 
+                min-height: 20px;
+                flex-direction: row;
+                align-items: center;
+                flex-wrap: nowrap;
+            }
+            
+            .agenda-toolbar {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 1rem;
+            }
+            
+            .agenda-search {
+                flex: 1;
+                max-width: 100%;
+            }
             
             .main-content {
                 padding: 1rem 0;
@@ -621,7 +779,7 @@
             }
             
             .page-header {
-                padding: 2rem 1rem;
+                padding: 2.5rem 1rem;
                 margin-bottom: 1.5rem;
                 border-radius: 0 0 25px 25px;
             }
@@ -637,29 +795,85 @@
             }
             
             .agenda-grid {
+                grid-template-columns: 1fr;
+                gap: 1.2rem;
                 padding: 0 0.5rem;
             }
             
             .agenda-card { 
-                min-height: 170px !important; 
-                padding: 1rem;
-                border-radius: 16px;
-            }
-            
-            .agenda-grid {
-                grid-template-columns: 1fr;
-                gap: 1rem;
+                min-height: 200px !important; 
+                padding: 1.2rem;
+                border-radius: 18px;
             }
             
             .agenda-header {
                 margin-bottom: 1rem;
                 flex: 1;
                 min-height: 60px;
+                gap: 0.8rem;
+            }
+            
+            .agenda-icon {
+                width: 48px;
+                height: 48px;
+                font-size: 1.4rem;
+            }
+            
+            .agenda-title {
+                font-size: 1rem;
             }
             
             .agenda-meta {
-                padding: 1rem;
+                padding-top: 1rem;
+                flex-direction: row;
+                align-items: center;
+                gap: 0.6rem;
+                flex-wrap: nowrap;
             }
+            
+            .agenda-toolbar {
+                flex-direction: column;
+                gap: 0.8rem;
+            }
+            
+            .agenda-tabs {
+                width: 100%;
+                justify-content: space-between;
+            }
+            
+            .agenda-tab {
+                padding: 0.5rem 0.8rem;
+                font-size: 0.85rem;
+            }
+            
+            .agenda-search {
+                width: 100%;
+                max-width: 100%;
+            }
+        }
+        
+        /* Agenda description styling */
+        .agenda-description {
+            color: #64748b;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            margin: 0.8rem 0;
+            padding: 0.8rem;
+            background: rgba(37, 99, 235, 0.03);
+            border-radius: 12px;
+            border-left: 3px solid #2563eb;
+        }
+        
+        .agenda-description p {
+            margin: 0;
+        }
+        
+        .agenda-keterangan {
+            display: none;
+        }
+        
+        .agenda-keterangan p {
+            margin: 0;
         }
         
         /* Animation for cards */
@@ -667,6 +881,7 @@
             animation: fadeInUp 0.6s ease forwards;
             opacity: 0;
             transform: translateY(30px);
+            height: 100%;
         }
         
         .agenda-card:nth-child(1) { animation-delay: 0.1s; }
@@ -709,6 +924,14 @@
                         <div class="hero-stat-item">
                             <i class="bi bi-calendar-event"></i>
                             <span>{{ $agendas->count() }} Agenda</span>
+                        </div>
+                        <div class="hero-stat-item">
+                            <i class="bi bi-clock-history"></i>
+                            <span>Terupdate</span>
+                        </div>
+                        <div class="hero-stat-item">
+                            <i class="bi bi-shield-check"></i>
+                            <span>Terpercaya</span>
                         </div>
                     </div>
                 </div>
@@ -784,6 +1007,11 @@
                             $keterangan = $agenda->keterangan ?? null;
                         @endphp
                         
+                        @php
+                            $displayMulai = $waktuMulai ? \Carbon\Carbon::parse($waktuMulai)->format('H:i') : null;
+                            $displaySelesai = $waktuSelesai ? \Carbon\Carbon::parse($waktuSelesai)->format('H:i') : null;
+                        @endphp
+                        
                         <div class="agenda-card {{ $tipe }}" data-status="{{ $isUpcoming ? 'upcoming' : 'completed' }}" data-title="{{ strtolower($judul) }}">
                             <div class="agenda-header">
                                 <div class="agenda-icon"><i class="{{ $icon }}"></i></div>
@@ -801,10 +1029,10 @@
                                 </div>
                                 <div class="meta-item">
                                     <i class="bi bi-clock"></i>
-                                    <span>{{ $waktuMulai }} - {{ $waktuSelesai }}</span>
+                                    <span>{{ $displayMulai ?? '—' }} - {{ $displaySelesai ?? '—' }}</span>
                                 </div>
                                 @if(!empty($agenda->lokasi))
-                                <div class="meta-item">
+                                <div class="meta-item location">
                                     <i class="bi bi-geo-alt"></i>
                                     <span>{{ $agenda->lokasi }}</span>
                                 </div>
@@ -813,11 +1041,6 @@
                                     {{ $isUpcoming ? 'Akan Datang' : 'Selesai' }}
                                 </span>
                             </div>
-                            @if(!empty($keterangan) && $keterangan !== $deskripsi)
-                                <div class="agenda-keterangan">
-                                    <p><strong>Keterangan:</strong> {{ $keterangan }}</p>
-                                </div>
-                            @endif
                         </div>
                     @endforeach
                 @else

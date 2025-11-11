@@ -786,15 +786,19 @@
                     <img src="{{ asset('images/mengenal-smkn4.jpg') }}" alt="SMKN 4 Bogor" class="img-fluid rounded shadow" style="border-radius: 20px !important;" onerror="this.src='https://images.unsplash.com/photo-1427504494785-3a9ca7044f45?w=600'">
                 </div>
                 <div class="col-lg-6">
-                    <h2 class="mb-4" style="font-size: 2.2rem; font-weight: 800; line-height: 1.3;">
-                        <span style="color: #1e40af;">Mengenal Lebih Dekat</span> <span style="color: #1a202c;">SMKN 4 Bogor</span>
-                    </h2>
-                    <p style="color: #2d3748; font-size: 1.15rem; line-height: 1.9; margin-bottom: 1.5rem; font-weight: 500; text-align: justify;">
-                        SMK Negeri 4 Bogor adalah sekolah menengah kejuruan negeri yang berkomitmen untuk mencetak generasi yang <strong style="color: #1e40af;">cerdas, berkarakter, dan berdaya saing tinggi</strong>. Sebagai lembaga pendidikan vokasi, SMKN 4 Bogor tidak hanya fokus pada penguasaan keterampilan teknis, tetapi juga menanamkan nilai-nilai <strong style="color: #1e40af;">kedisiplinan, tanggung jawab, dan integritas</strong> kepada setiap peserta didik.
-                    </p>
-                    <p style="color: #2d3748; font-size: 1.15rem; line-height: 1.9; font-weight: 500; text-align: justify;">
-                        Dengan dukungan tenaga pendidik profesional, fasilitas belajar yang lengkap, serta suasana belajar yang kondusif, SMKN 4 Bogor terus berupaya menciptakan lingkungan pendidikan yang <strong style="color: #1e40af;">inspiratif dan menyenangkan</strong>.
-                    </p>
+                    <div class="card border-0 shadow-sm" style="border-radius: 16px;">
+                        <div class="card-body" style="padding: 1.25rem 1.5rem;">
+                            <h3 class="mb-3" style="font-size: 1.6rem; font-weight: 700; line-height: 1.4; color: #1a202c;">
+                                <span style="color: #1e40af;">Mengenal Lebih Dekat</span> <span style="color: #1a202c;">SMKN 4 Bogor</span>
+                            </h3>
+                            <p class="mb-3" style="color: #2d3748; font-size: 1rem; line-height: 1.8; text-align: justify;">
+                                SMK Negeri 4 Bogor adalah sekolah menengah kejuruan negeri yang berkomitmen untuk mencetak generasi yang <strong style="color: #1e40af;">cerdas, berkarakter, dan berdaya saing tinggi</strong>. Sebagai lembaga pendidikan vokasi, SMKN 4 Bogor tidak hanya fokus pada penguasaan keterampilan teknis, tetapi juga menanamkan nilai-nilai <strong style="color: #1e40af;">kedisiplinan, tanggung jawab, dan integritas</strong> kepada setiap peserta didik.
+                            </p>
+                            <p class="mb-0" style="color: #2d3748; font-size: 1rem; line-height: 1.8; text-align: justify;">
+                                Dengan dukungan tenaga pendidik profesional, fasilitas belajar yang lengkap, serta suasana belajar yang kondusif, SMKN 4 Bogor terus berupaya menciptakan lingkungan pendidikan yang <strong style="color: #1e40af;">inspiratif dan menyenangkan</strong>.
+                            </p>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -827,15 +831,19 @@
             <!-- Sejarah Section dengan Gambar -->
             <div class="row mb-5 align-items-center fade-in-section" id="sejarah">
                 <div class="col-lg-6 mb-4 mb-lg-0">
-                    <h2 class="mb-4" style="font-size: 2.2rem; font-weight: 800; line-height: 1.3;">
-                        <i class="bi bi-clock-history me-2" style="color: #1e40af;"></i><span style="color: #1e40af;">Sejarah</span> <span style="color: #1a202c;">SMKN 4 Bogor</span>
-                    </h2>
-                    <p class="lead" style="color: #2d3748; font-size: 1.2rem; line-height: 1.9; font-weight: 600; margin-bottom: 1.5rem; text-align: justify;">SMK Negeri 4 Bogor merupakan salah satu sekolah menengah kejuruan negeri yang berdiri di bawah naungan Dinas Pendidikan Provinsi Jawa Barat.</p>
-                    <p style="color: #2d3748; font-size: 1.15rem; line-height: 1.9; margin-bottom: 1.5rem; font-weight: 500; text-align: justify;">Sekolah ini berdiri berdasarkan <strong style="color: #1e40af;">SK Operasional Nomor 421-45-177 Tahun 2009</strong>, tepatnya pada tanggal <strong style="color: #1e40af;">15 Juni 2009</strong>. Pendirian sekolah ini dilatarbelakangi oleh kebutuhan masyarakat Kota Bogor akan pendidikan kejuruan yang dapat menghasilkan lulusan siap kerja, terampil, serta mampu bersaing di era industri dan teknologi digital.</p>
-                    <p style="color: #2d3748; font-size: 1.15rem; line-height: 1.9; font-weight: 500; text-align: justify;">Berlokasi di <strong style="color: #1e40af;">Kampung Buntar, Kelurahan Muarasari, Kota Bogor</strong>, SMKN 4 Bogor terus berkembang dan berinovasi dalam memberikan pendidikan berkualitas kepada para siswa.</p>
+                    <div class="card border-0 shadow-sm" style="border-radius: 16px;">
+                        <div class="card-body" style="padding: 1.25rem 1.5rem;">
+                            <h3 class="mb-3" style="font-size: 1.6rem; font-weight: 700; line-height: 1.4; color: #1a202c;">
+                                <i class="bi bi-clock-history me-2" style="color: #1e40af;"></i><span style="color: #1e40af;">Sejarah</span> <span style="color: #1a202c;">SMKN 4 Bogor</span>
+                            </h3>
+                            <p class="mb-3" style="color: #2d3748; font-size: 1rem; line-height: 1.8; text-align: justify;">SMK Negeri 4 Bogor merupakan salah satu sekolah menengah kejuruan negeri yang berdiri di bawah naungan Dinas Pendidikan Provinsi Jawa Barat.</p>
+                            <p class="mb-3" style="color: #2d3748; font-size: 1rem; line-height: 1.8; text-align: justify;">Sekolah ini berdiri berdasarkan <strong style="color: #1e40af;">SK Operasional Nomor 421-45-177 Tahun 2009</strong>, tepatnya pada tanggal <strong style="color: #1e40af;">15 Juni 2009</strong>. Pendirian sekolah ini dilatarbelakangi oleh kebutuhan masyarakat Kota Bogor akan pendidikan kejuruan yang dapat menghasilkan lulusan siap kerja, terampil, serta mampu bersaing di era industri dan teknologi digital.</p>
+                            <p class="mb-0" style="color: #2d3748; font-size: 1rem; line-height: 1.8; text-align: justify;">Berlokasi di <strong style="color: #1e40af;">Kampung Buntar, Kelurahan Muarasari, Kota Bogor</strong>, SMKN 4 Bogor terus berkembang dan berinovasi dalam memberikan pendidikan berkualitas kepada para siswa.</p>
+                        </div>
+                    </div>
                 </div>
                 <div class="col-lg-6">
-                    <img src="{{ asset('images/sejarah-smkn4.jpg') }}" alt="Sejarah SMKN 4" class="img-fluid rounded shadow" style="border-radius: 20px !important;" onerror="this.src='https://images.unsplash.com/photo-1562774053-701939374585?w=600'">
+                    <img src="{{ asset('images/sejarah-smkn4.jpg') }}" alt="Sejarah SMKN 4" class="img-fluid rounded shadow" style="border-radius: 20px !important; height: 400px; width: 100%; object-fit: cover;" onerror="this.src='https://images.unsplash.com/photo-1562774053-701939374585?w=600'">
                 </div>
             </div>
 

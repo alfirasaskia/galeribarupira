@@ -3474,7 +3474,7 @@
             <div class="gallery-grid-container" data-aos="zoom-in" data-aos-delay="200">
                 <div class="swiper gallerySwiper">
                     <div class="swiper-wrapper">
-                    @foreach($galleryCategories as $category)
+                    @foreach(($galleryCategories instanceof \Illuminate\Support\Collection ? $galleryCategories->take(6) : collect($galleryCategories)->take(6)) as $category)
                     <div class="swiper-slide">
                 <div class="gallery-card" onclick="openGalleryModal('{{ $category->id }}', '{{ $category->nama }}')">
                     @php

@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Kelola Agenda - Admin Dashboard</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
@@ -453,13 +454,16 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 1rem;
+            padding: 1.8rem 2rem;
             background: white;
             border-bottom: 1px solid var(--border-color);
+            border-radius: 16px;
+            box-shadow: var(--shadow-md);
+            margin-bottom: 2rem;
         }
 
         .page-title {
-            font-size: 1.25rem;
+            font-size: 1.5rem;
             font-weight: 700;
             color: var(--dark-color);
             margin-bottom: 0.5rem;
@@ -467,7 +471,7 @@
 
         .page-date {
             color: var(--light-gray);
-            font-size: 0.9rem;
+            font-size: 0.95rem;
         }
 
         .user-info {
@@ -516,23 +520,33 @@
             font-size: 0.8rem;
         }
 
-        .add-agenda-btn {
-            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+        .add-agenda-btn,
+        .new-category-btn {
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
             color: white;
             border: none;
-            padding: 0.75rem 1.5rem;
-            border-radius: 12px;
+            padding: 0.8rem 1.8rem;
+            border-radius: 14px;
             font-weight: 600;
-            transition: all 0.3s ease;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             cursor: pointer;
             display: inline-flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 0.6rem;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+            font-size: 0.95rem;
         }
 
-        .add-agenda-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-lg);
+        .add-agenda-btn:hover,
+        .new-category-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4);
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+        }
+
+        .add-agenda-btn:active,
+        .new-category-btn:active {
+            transform: translateY(-1px);
         }
 
     </style>
@@ -663,46 +677,48 @@
             
             @if(isset($groupedAgendas) && $groupedAgendas->count() > 0)
                 @foreach($groupedAgendas as $month => $items)
-                    <div class="agenda-month-section">
-                        <h3 class="month-header">{{ $month }}</h3>
+                    <div class="agenda-month-section" style="margin-top: 2.5rem; padding-top: 1.5rem; border-top: 1px solid #e2e8f0;">
+                        <h6 style="font-size: 0.9rem; font-weight: 500; color: #64748b; margin-bottom: 1.5rem; text-transform: capitalize;">{{ $month }}</h6>
                         <div class="row g-4">
                             @foreach($items as $item)
-                                <div class="col-12 col-md-6 col-xl-4">
-                                    <div class="agenda-card card h-100">
-                                        <div class="card-body">
+                                <div class="col-12 col-md-6 col-lg-4">
+                                    <div class="agenda-card card h-100" style="min-height: 220px;">
+                                        <div class="card-body" style="display: flex; flex-direction: column; padding: 1rem;">
                                             <div class="d-flex justify-content-between align-items-start mb-2">
-                                                <h5 class="card-title mb-0">{{ $item->judul }}</h5>
-                                                <span class="badge bg-{{ $item->status === 'aktif' ? 'success' : ($item->status === 'selesai' ? 'secondary' : 'warning') }}">
+                                                <h6 class="card-title mb-0" style="font-size: 0.95rem; font-weight: 600;">{{ strlen($item->judul) > 25 ? substr($item->judul, 0, 25) . '...' : $item->judul }}</h6>
+                                                <span class="badge bg-{{ $item->status === 'aktif' ? 'success' : ($item->status === 'selesai' ? 'secondary' : 'warning') }}" style="font-size: 0.7rem; padding: 0.3rem 0.6rem;">
                                                     {{ ucfirst($item->status) }}
                                                 </span>
                                             </div>
                                             
                                             @if(!empty($item->deskripsi))
-                                                <p class="card-text text-muted small mb-3">{{ $item->deskripsi }}</p>
+                                                <p class="card-text text-muted" style="font-size: 0.75rem; margin-bottom: 0.8rem; line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; text-align: justify;">{{ $item->deskripsi }}</p>
+                                            @else
+                                                <p class="card-text text-muted" style="font-size: 0.75rem; margin-bottom: 0.8rem; line-height: 1.3; color: #cbd5e1; font-style: italic;">Tidak ada deskripsi</p>
                                             @endif
                                             
-                                            <div class="agenda-meta">
-                                                <div class="meta-item">
-                                                    <i class="far fa-calendar"></i>
-                                                    <span>{{ \Carbon\Carbon::parse($item->tanggal)->translatedFormat('l, d F Y') }}</span>
+                                            <div class="agenda-meta" style="margin-top: auto; border-top: 1px solid #e5e7eb; padding-top: 0.6rem;">
+                                                <div class="meta-item" style="font-size: 0.75rem; margin-bottom: 0.3rem;">
+                                                    <i class="far fa-calendar" style="width: 12px;"></i>
+                                                    <span>{{ \Carbon\Carbon::parse($item->tanggal)->format('d M Y') }}</span>
                                                 </div>
-                                                <div class="meta-item">
-                                                    <i class="far fa-clock"></i>
+                                                <div class="meta-item" style="font-size: 0.75rem; margin-bottom: 0.3rem;">
+                                                    <i class="far fa-clock" style="width: 12px;"></i>
                                                     <span>{{ $item->waktu_mulai ?? '00:00' }} - {{ $item->waktu_selesai ?? '23:59' }}</span>
                                                 </div>
-                                                @if(!empty($item->tempat))
-                                                <div class="meta-item">
-                                                    <i class="fas fa-map-marker-alt"></i>
-                                                    <span>{{ $item->tempat }}</span>
+                                                @if(!empty($item->lokasi))
+                                                <div class="meta-item" style="font-size: 0.75rem;">
+                                                    <i class="fas fa-map-marker-alt" style="width: 12px;"></i>
+                                                    <span>{{ strlen($item->lokasi) > 25 ? substr($item->lokasi, 0, 25) . '...' : $item->lokasi }}</span>
                                                 </div>
                                                 @endif
                                             </div>
                                             
-                                            <div class="d-flex justify-content-end gap-2 mt-3 pt-2">
-                                                <button class="btn btn-sm btn-outline-primary edit-agenda" data-id="{{ $item->id }}" data-bs-toggle="modal" data-bs-target="#editAgendaModal">
+                                            <div class="d-flex justify-content-end gap-2" style="margin-top: 0.6rem; padding-top: 0.6rem; border-top: 1px solid #e5e7eb;">
+                                                <button class="btn btn-sm btn-outline-primary edit-agenda" data-id="{{ $item->id }}" data-bs-toggle="modal" data-bs-target="#editAgendaModal" style="font-size: 0.75rem; padding: 0.3rem 0.6rem;">
                                                     <i class="fas fa-edit fa-fw"></i>
                                                 </button>
-                                                <button class="btn btn-sm btn-outline-danger delete-agenda" data-id="{{ $item->id }}">
+                                                <button class="btn btn-sm btn-outline-danger delete-agenda" data-id="{{ $item->id }}" style="font-size: 0.75rem; padding: 0.3rem 0.6rem;">
                                                     <i class="fas fa-trash fa-fw"></i>
                                                 </button>
                                             </div>
@@ -767,7 +783,7 @@
                                 <textarea name="deskripsi" class="form-control" rows="3" placeholder="Masukkan deskripsi agenda"></textarea>
                             </div>
                             
-                            <div class="col-md-6 mb-3">
+                            <div class="col-12 mb-3">
                                 <label class="form-label fw-semibold">Lokasi</label>
                                 <input type="text" name="lokasi" class="form-control" placeholder="Tempat pelaksanaan">
                             </div>
@@ -838,7 +854,7 @@
                                 <textarea name="deskripsi" class="form-control" rows="3" placeholder="Masukkan deskripsi agenda"></textarea>
                             </div>
                             
-                            <div class="col-md-6 mb-3">
+                            <div class="col-12 mb-3">
                                 <label class="form-label fw-semibold">Lokasi</label>
                                 <input type="text" name="lokasi" class="form-control" placeholder="Tempat pelaksanaan">
                             </div>
@@ -986,7 +1002,7 @@
                 });
             });
 
-            // Edit button wiring - optimized
+            // Edit button wiring - fetch data from server
             document.querySelectorAll('.edit-agenda').forEach(btn => {
                 btn.addEventListener('click', function(e) {
                     e.preventDefault();
@@ -995,62 +1011,33 @@
                     const form = document.getElementById('editAgendaForm');
                     form.action = `/admin/agenda/${agendaId}`;
                     
-                    // Get the card element that was clicked
-                    const card = this.closest('.card');
-                    
-                    // Populate the form with existing data
-                    form.querySelector('input[name="judul"]').value = card.querySelector('.card-title').textContent.trim();
-                    
-                    // Get date and time from the meta items
-                    const dateText = card.querySelector('.meta-item:first-child span').textContent.trim();
-                    const timeText = card.querySelectorAll('.meta-item')[1].querySelector('span').textContent.trim();
-                    
-                    // Format date for input[type="date"]
-                    const dateParts = dateText.split(' ');
-                    const months = {
-                        'Januari': '01', 'Februari': '02', 'Maret': '03', 'April': '04', 'Mei': '05', 'Juni': '06',
-                        'Juli': '07', 'Agustus': '08', 'September': '09', 'Oktober': '10', 'November': '11', 'Desember': '12'
-                    };
-                    const day = dateParts[1];
-                    const month = months[dateParts[2]];
-                    const year = dateParts[3];
-                    const formattedDate = `${year}-${month}-${day.padStart(2, '0')}`;
-                    
-                    form.querySelector('input[name="tanggal"]').value = formattedDate;
-                    
-                    // Format time for input[type="time"]
-                    const [startTime, endTime] = timeText.split(' - ');
-                    form.querySelector('input[name="waktu_mulai"]').value = startTime || '00:00';
-                    form.querySelector('input[name="waktu_selesai"]').value = endTime || '23:59';
-                    
-                    // Get description if it exists
-                    const descElement = card.querySelector('.card-text');
-                    if (descElement) {
-                        form.querySelector('textarea[name="deskripsi"]').value = descElement.textContent.trim();
-                    } else {
-                        form.querySelector('textarea[name="deskripsi"]').value = '';
-                    }
-                    
-                    // Get location if it exists
-                    const locationElement = Array.from(card.querySelectorAll('.meta-item')).find(el => 
-                        el.querySelector('.fa-map-marker-alt')
-                    );
-                    if (locationElement) {
-                        form.querySelector('input[name="lokasi"]').value = locationElement.querySelector('span').textContent.trim();
-                    } else {
-                        form.querySelector('input[name="lokasi"]').value = '';
-                    }
-                    
-                    // Set status
-                    const statusBadge = card.querySelector('.badge');
-                    if (statusBadge) {
-                        const status = statusBadge.textContent.trim().toLowerCase();
-                        form.querySelector('select[name="status"]').value = status;
-                    }
-                    
-                    // Show the edit modal
-                    const modal = new bootstrap.Modal(document.getElementById('editAgendaModal'));
-                    modal.show();
+                    // Fetch agenda data from server
+                    fetch(`/admin/agenda/${agendaId}`, {
+                        method: 'GET',
+                        headers: {
+                            'Accept': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        // Populate form with fetched data
+                        form.querySelector('input[name="judul"]').value = data.judul || '';
+                        form.querySelector('input[name="tanggal"]').value = data.tanggal || '';
+                        form.querySelector('input[name="waktu_mulai"]').value = data.waktu_mulai || '00:00';
+                        form.querySelector('input[name="waktu_selesai"]').value = data.waktu_selesai || '23:59';
+                        form.querySelector('textarea[name="deskripsi"]').value = data.deskripsi || '';
+                        form.querySelector('input[name="lokasi"]').value = data.lokasi || '';
+                        form.querySelector('select[name="status"]').value = data.status || 'aktif';
+                        
+                        // Show the edit modal
+                        const modal = new bootstrap.Modal(document.getElementById('editAgendaModal'));
+                        modal.show();
+                    })
+                    .catch(error => {
+                        console.error('Error fetching agenda:', error);
+                        alert('Gagal memuat data agenda');
+                    });
                 });
             });
             
@@ -1082,28 +1069,10 @@
                     }
                 });
             });
-            
-                    // Fill values directly without recreating form
-                    form.querySelector('input[name="judul"]').value = this.dataset.judul || '';
-                    form.querySelector('input[name="tanggal"]').value = this.dataset.tanggal || '';
-                    // Waktu field removed
-                    form.querySelector('select[name="status"]').value = this.dataset.status || 'aktif';
-                    
-                    // Set form action
-                    setFormAction(this.dataset.id);
-                    
-                    // Update modal title
-                    modalTitle.innerHTML = '<i class="fas fa-edit me-2"></i>Edit Agenda';
-                    
-                    // Show modal
-                    addModal.show();
-                });
-            });
-
 
             // Hamburger menu toggle
-            const hamburger=document.getElementById('hamburgerMenu');
-            const sidebar=document.querySelector('.sidebar');
+            const hamburger = document.getElementById('hamburgerMenu');
+            const sidebar = document.querySelector('.sidebar');
             if(hamburger && sidebar){
                 hamburger.addEventListener('click',function(){
                     hamburger.classList.toggle('active');

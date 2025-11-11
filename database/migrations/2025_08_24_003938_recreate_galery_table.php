@@ -19,10 +19,14 @@ return new class extends Migration
             $table->string('nama');
             $table->text('deskripsi')->nullable();
             $table->string('cover_image')->nullable();
-            $table->foreignId('kategori_id')->nullable()->constrained('kategori')->onDelete('set null');
-            $table->foreignId('user_id')->nullable()->constrained('users')->onDelete('set null');
+            $table->unsignedBigInteger('kategori_id')->nullable();
+            $table->unsignedBigInteger('user_id')->nullable();
             $table->string('status')->default('public'); // public, private
             $table->timestamps();
+            
+            // Add foreign keys with proper error handling
+            $table->foreign('kategori_id')->references('id')->on('kategori')->onDelete('set null');
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('set null');
         });
     }
 

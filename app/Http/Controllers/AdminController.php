@@ -333,7 +333,25 @@ class AdminController extends Controller
             if ($request->hasFile('file')) {
                 $file = $request->file('file');
                 $filename = time() . '_' . $file->getClientOriginalName();
+                
+                // Ensure photos directory exists
+                $photosDir = storage_path('app/public/photos');
+                if (!file_exists($photosDir)) {
+                    mkdir($photosDir, 0755, true);
+                }
+                
+                // Store file directly to ensure it's saved
                 $path = $file->storeAs('photos', $filename, 'public');
+                
+                // Verify file was actually saved
+                $fullPath = storage_path('app/public/' . $path);
+                if (!file_exists($fullPath)) {
+                    // Try alternative save method
+                    $content = file_get_contents($file->getRealPath());
+                    if (!file_put_contents($fullPath, $content)) {
+                        throw new \Exception('File gagal disimpan ke storage (storeAs dan file_put_contents gagal)');
+                    }
+                }
 
                 // Get file information
                 $fileSize = $file->getSize(); // in bytes
@@ -434,9 +452,25 @@ class AdminController extends Controller
                 // Create storage link if not exists
                 $this->ensureStorageLink();
                 
+                // Ensure photos directory exists
+                $photosDir = storage_path('app/public/photos');
+                if (!file_exists($photosDir)) {
+                    mkdir($photosDir, 0755, true);
+                }
+                
                 $file = $request->file('file');
                 $filename = time() . '_' . $file->getClientOriginalName();
                 $path = $file->storeAs('photos', $filename, 'public');
+                
+                // Verify file was actually saved
+                $fullPath = storage_path('app/public/' . $path);
+                if (!file_exists($fullPath)) {
+                    // Try alternative save method
+                    $content = file_get_contents($file->getRealPath());
+                    if (!file_put_contents($fullPath, $content)) {
+                        throw new \Exception('File gagal disimpan ke storage (storeAs dan file_put_contents gagal)');
+                    }
+                }
 
                 // Get file information
                 $fileSize = $file->getSize();
@@ -627,10 +661,16 @@ class AdminController extends Controller
                 ->orderBy('tanggal', 'desc')
                 ->get();
                 
-            // Group agendas by month
-            $groupedAgendas = $agendas->groupBy(function($item) {
-                return \Carbon\Carbon::parse($item->tanggal)->format('F Y');
-            });
+            // Group agendas by month - using array grouping
+            $groupedAgendas = [];
+            foreach ($agendas as $item) {
+                $monthKey = \Carbon\Carbon::parse($item->tanggal)->format('F Y');
+                if (!isset($groupedAgendas[$monthKey])) {
+                    $groupedAgendas[$monthKey] = [];
+                }
+                $groupedAgendas[$monthKey][] = $item;
+            }
+            $groupedAgendas = collect($groupedAgendas);
         } catch (\Exception $e) {
             $agendas = collect();
             $groupedAgendas = collect();
@@ -667,18 +707,20 @@ class AdminController extends Controller
     {
         $request->validate([
             'judul' => 'required|string|max:255',
-            'keterangan' => 'nullable|string',
+            'deskripsi' => 'nullable|string',
             'tanggal' => 'required|date',
-            'waktu' => 'nullable|string',
+            'waktu_mulai' => 'nullable|date_format:H:i',
+            'waktu_selesai' => 'nullable|date_format:H:i',
             'lokasi' => 'nullable|string',
             'status' => 'required|in:aktif,draft,selesai'
         ]);
         
         DB::table('agenda')->insert([
             'judul' => $request->judul,
-            'keterangan' => $request->keterangan,
+            'deskripsi' => $request->deskripsi,
             'tanggal' => $request->tanggal,
-            'waktu' => $request->waktu,
+            'waktu_mulai' => $request->waktu_mulai,
+            'waktu_selesai' => $request->waktu_selesai,
             'lokasi' => $request->lokasi,
             'status' => $request->status,
             'created_at' => now(),
@@ -686,6 +728,17 @@ class AdminController extends Controller
         ]);
         
         return redirect()->route('admin.agenda.index')->with('success', 'Agenda berhasil ditambahkan!');
+    }
+
+    public function agendaShow($id)
+    {
+        $agenda = DB::table('agenda')->where('id', $id)->first();
+        
+        if (!$agenda) {
+            return response()->json(['error' => 'Agenda tidak ditemukan'], 404);
+        }
+        
+        return response()->json($agenda);
     }
 
     public function agendaEdit($id)
@@ -704,18 +757,20 @@ class AdminController extends Controller
     {
         $request->validate([
             'judul' => 'required|string|max:255',
-            'keterangan' => 'nullable|string',
+            'deskripsi' => 'nullable|string',
             'tanggal' => 'required|date',
-            'waktu' => 'nullable|string',
+            'waktu_mulai' => 'nullable|date_format:H:i',
+            'waktu_selesai' => 'nullable|date_format:H:i',
             'lokasi' => 'nullable|string',
             'status' => 'required|in:aktif,draft,selesai'
         ]);
         
         DB::table('agenda')->where('id', $id)->update([
             'judul' => $request->judul,
-            'keterangan' => $request->keterangan,
+            'deskripsi' => $request->deskripsi,
             'tanggal' => $request->tanggal,
-            'waktu' => $request->waktu,
+            'waktu_mulai' => $request->waktu_mulai,
+            'waktu_selesai' => $request->waktu_selesai,
             'lokasi' => $request->lokasi,
             'status' => $request->status,
             'updated_at' => now()
@@ -1270,7 +1325,7 @@ class AdminController extends Controller
                 DB::raw('SUM(CASE WHEN activity_type = "like" THEN 1 ELSE 0 END) as likes'),
                 DB::raw('SUM(CASE WHEN activity_type = "comment" THEN 1 ELSE 0 END) as comments'),
                 DB::raw('SUM(CASE WHEN activity_type = "bookmark" THEN 1 ELSE 0 END) as bookmarks'),
-                DB::raw('SUM(CASE WHEN activity_type = "share" THEN 1 ELSE 0 END) as shares'),
+                DB::raw('SUM(CASE WHEN activity_type = "view" THEN 1 ELSE 0 END) as views'),
                 DB::raw('count(*) as total')
             )
             ->when($startDate && $endDate, function($q) use ($startDate, $endDate) {

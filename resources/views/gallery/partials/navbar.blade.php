@@ -43,54 +43,47 @@
                 </li>
             </ul>
             <div class="d-flex align-items-center gap-2">
-                <!-- User Account Section -->
-                <div class="dropdown">
-                    <a href="#" class="d-flex align-items-center bg-light px-3 py-1 rounded-pill text-decoration-none profile-link dropdown-toggle" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false" style="transition: all 0.3s ease;">
-                        @php
-                            $user = session('user_id') ? \DB::table('users')->where('id', session('user_id'))->first() : null;
-                        @endphp
-                        @if($user && $user->profile_photo)
-                            <img src="{{ asset('storage/' . $user->profile_photo) }}" alt="{{ session('user_name') }}" class="rounded-circle me-2" style="width: 32px; height: 32px; object-fit: cover;">
-                        @else
-                            <i class="bi bi-person-circle me-2" style="font-size: 1.25rem;"></i>
-                        @endif
-                        <span class="d-none d-md-inline">{{ session('user_name') ?? 'Akun Saya' }}</span>
-                    </a>
-                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown" style="border: none; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); border-radius: 12px; overflow: hidden;">
-                        @if(session('user_id'))
+                @if(session('user_id') || session('admin_id'))
+                    <!-- User logged in: show account dropdown -->
+                    <div class="dropdown">
+                        <a href="#" class="d-flex align-items-center bg-light px-3 py-1 rounded-pill text-decoration-none profile-link dropdown-toggle" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false" style="transition: all 0.3s ease;">
+                            @php
+                                $user = session('user_id') ? \DB::table('users')->where('id', session('user_id'))->first() : null;
+                                $hasPhoto = $user && !empty($user->profile_photo);
+                            @endphp
+                            @if($hasPhoto)
+                                <img src="{{ asset('storage/' . $user->profile_photo) }}" alt="{{ session('user_name') }}" class="rounded-circle me-2" style="width: 32px; height: 32px; object-fit: cover; border: 2px solid #1E40AF;">
+                            @else
+                                <i class="bi bi-person-circle me-2" style="font-size: 1.25rem;"></i>
+                            @endif
+                            <span class="d-none d-md-inline">{{ session('user_name') ?? session('admin_name') ?? 'User' }}</span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown" style="border: none; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); border-radius: 12px; overflow: hidden;">
                             <li>
-                                <a class="dropdown-item" href="{{ url('/user/profile/' . session('user_id')) }}">
-                                    <i class="bi bi-person me-2"></i>Profil Saya
+                                <a class="dropdown-item" href="{{ session('user_id') ? url('/user/profile/' . session('user_id')) : '#' }}">
+                                    <i class="bi bi-person me-2"></i>View Profile
                                 </a>
                             </li>
                             <li>
                                 <a class="dropdown-item" href="{{ url('/user/profile/edit') }}">
-                                    <i class="bi bi-pencil-square me-2"></i>Edit Profil
+                                    <i class="bi bi-gear me-2"></i>Settings
                                 </a>
                             </li>
                             <li><hr class="dropdown-divider"></li>
                             <li>
-                                <form action="{{ route('logout') }}" method="POST" class="d-inline">
-                                    @csrf
-                                    <button type="submit" class="dropdown-item text-danger">
-                                        <i class="bi bi-box-arrow-right me-2"></i>Logout
-                                    </button>
-                                </form>
-                            </li>
-                        @else
-                            <li>
-                                <a class="dropdown-item" href="{{ route('login') }}">
-                                    <i class="bi bi-box-arrow-in-right me-2"></i>Login
+                                <a class="dropdown-item text-danger" href="{{ route('logout.get') }}">
+                                    <i class="bi bi-box-arrow-right me-2"></i>Sign Out
                                 </a>
                             </li>
-                            <li>
-                                <a class="dropdown-item" href="{{ route('register') }}">
-                                    <i class="bi bi-person-plus me-2"></i>Daftar
-                                </a>
-                            </li>
-                        @endif
-                    </ul>
-                </div>
+                        </ul>
+                    </div>
+                @else
+                    @if(!(request()->routeIs('gallery.galeri') || request()->routeIs('gallery.agenda') || request()->routeIs('gallery.profile') || request()->routeIs('gallery.berita.detail')))
+                        <!-- Not logged in (except gallery & agenda pages): show Login/Register -->
+                        <a class="btn btn-sm btn-outline-primary rounded-pill" href="{{ route('login') }}">Login</a>
+                        <a class="btn btn-sm rounded-pill" href="{{ route('register') }}" style="background: transparent; border: 2px solid #1E3A8A; color: #1E3A8A;">Daftar</a>
+                    @endif
+                @endif
                 <style>
                     .profile-link:hover {
                         background: #e5e7eb !important;

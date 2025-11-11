@@ -333,11 +333,11 @@
                         <tr>
                             <td style="text-align: center;">
                                 <div style="width: 35px; height: 35px; border-radius: 50%; background: linear-gradient(135deg,#10b981,#059669); display: flex; align-items: center; justify-content: center; color: white; margin: 0 auto; font-size: 0.85rem;">
-                                    <i class="fas fa-share-alt"></i>
+                                    <i class="fas fa-user-group"></i>
                                 </div>
                             </td>
-                            <td style="font-weight: 600; color: #1e293b; font-size: 0.9rem;">Total Share</td>
-                            <td style="text-align: right; font-size: 1.3rem; font-weight: 700; color: #10b981;">{{ number_format($totalShares) }}</td>
+                            <td style="font-weight: 600; color: #1e293b; font-size: 0.9rem;">Total Pengunjung</td>
+                            <td style="text-align: right; font-size: 1.3rem; font-weight: 700; color: #10b981;">{{ number_format($totalViews) }}</td>
                         </tr>
                     </tbody>
                 </table>
