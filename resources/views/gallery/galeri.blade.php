@@ -2341,6 +2341,8 @@
                                 <img src="{{ $imagePath }}" 
                                      alt="{{ $foto->judul ?? 'Foto' }}" 
                                      class="gallery-image"
+                                     loading="lazy"
+                                     decoding="async"
                                      onerror="this.parentElement.innerHTML='<i class=\'fas fa-image fa-3x text-muted\'></i>'">
                             @else
                                 <i class="fas fa-image fa-3x text-muted"></i>
