@@ -1605,10 +1605,6 @@
 
         .detail-btn:active {
             transform: translateY(0);
-            }
-            50% {
-                box-shadow: 0 4px 20px rgba(13, 110, 253, 0.5);
-            }
         }
 
         .detail-btn {
