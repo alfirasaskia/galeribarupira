@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Session;
+use App\Helpers\ImageHelper;
 
 class AdminController extends Controller
 {
@@ -340,22 +341,29 @@ class AdminController extends Controller
                     mkdir($photosDir, 0755, true);
                 }
                 
-                // Store file directly to ensure it's saved
-                $path = $file->storeAs('photos', $filename, 'public');
-                
-                // Verify file was actually saved
-                $fullPath = storage_path('app/public/' . $path);
-                if (!file_exists($fullPath)) {
-                    // Try alternative save method
-                    $content = file_get_contents($file->getRealPath());
-                    if (!file_put_contents($fullPath, $content)) {
-                        throw new \Exception('File gagal disimpan ke storage (storeAs dan file_put_contents gagal)');
-                    }
+                // Ensure thumbnails directory exists
+                $thumbnailsDir = storage_path('app/public/thumbnails');
+                if (!file_exists($thumbnailsDir)) {
+                    mkdir($thumbnailsDir, 0755, true);
                 }
-
-                // Get file information
-                $fileSize = $file->getSize(); // in bytes
-                $fileType = $file->getMimeType(); // Get MIME type
+                
+                // Auto-optimize image saat upload!
+                $path = 'photos/' . $filename;
+                try {
+                    $optimized = ImageHelper::optimizeUpload($file, $path, 'public');
+                    $path = $optimized['original']; // Use optimized path
+                    
+                    // Get optimized file size
+                    $fullPath = storage_path('app/public/' . $path);
+                    $fileSize = file_exists($fullPath) ? filesize($fullPath) : $file->getSize();
+                    $fileType = $file->getMimeType();
+                } catch (\Exception $e) {
+                    // Fallback: save original if optimization fails
+                    \Log::warning('Image optimization failed, using original: ' . $e->getMessage());
+                    $path = $file->storeAs('photos', $filename, 'public');
+                    $fileSize = $file->getSize();
+                    $fileType = $file->getMimeType();
+                }
 
                 // Get or create default gallery
                 $defaultGallery = DB::table('galery')->first();
@@ -458,29 +466,50 @@ class AdminController extends Controller
                     mkdir($photosDir, 0755, true);
                 }
                 
+                // Ensure thumbnails directory exists
+                $thumbnailsDir = storage_path('app/public/thumbnails');
+                if (!file_exists($thumbnailsDir)) {
+                    mkdir($thumbnailsDir, 0755, true);
+                }
+                
                 $file = $request->file('file');
                 $filename = time() . '_' . $file->getClientOriginalName();
-                $path = $file->storeAs('photos', $filename, 'public');
                 
-                // Verify file was actually saved
-                $fullPath = storage_path('app/public/' . $path);
-                if (!file_exists($fullPath)) {
-                    // Try alternative save method
-                    $content = file_get_contents($file->getRealPath());
-                    if (!file_put_contents($fullPath, $content)) {
-                        throw new \Exception('File gagal disimpan ke storage (storeAs dan file_put_contents gagal)');
-                    }
+                // Auto-optimize image saat upload!
+                $path = 'photos/' . $filename;
+                try {
+                    $optimized = ImageHelper::optimizeUpload($file, $path, 'public');
+                    $path = $optimized['original']; // Use optimized path
+                    
+                    // Get optimized file size
+                    $fullPath = storage_path('app/public/' . $path);
+                    $fileSize = file_exists($fullPath) ? filesize($fullPath) : $file->getSize();
+                    $fileType = $file->getMimeType();
+                } catch (\Exception $e) {
+                    // Fallback: save original if optimization fails
+                    \Log::warning('Image optimization failed, using original: ' . $e->getMessage());
+                    $path = $file->storeAs('photos', $filename, 'public');
+                    $fileSize = $file->getSize();
+                    $fileType = $file->getMimeType();
                 }
 
-                // Get file information
-                $fileSize = $file->getSize();
-                $fileType = $file->getMimeType();
-
-                // Delete old file
+                // Delete old file (original + optimized versions)
                 if ($photo->file_path) {
                     $oldFilePath = storage_path('app/public/' . $photo->file_path);
                     if (file_exists($oldFilePath)) {
-                        unlink($oldFilePath);
+                        @unlink($oldFilePath);
+                    }
+                    
+                    // Delete WebP version if exists
+                    $oldWebpPath = str_replace(['.jpg', '.jpeg', '.png'], '.webp', $oldFilePath);
+                    if (file_exists($oldWebpPath)) {
+                        @unlink($oldWebpPath);
+                    }
+                    
+                    // Delete thumbnail if exists
+                    $oldThumbPath = storage_path('app/public/thumbnails/' . basename($photo->file_path));
+                    if (file_exists($oldThumbPath)) {
+                        @unlink($oldThumbPath);
                     }
                 }
 

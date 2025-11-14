@@ -18,14 +18,7 @@
 /public/storage
 /storage/*.key
 /storage/pail
-/storage/app/public/photos
-/storage/app/public/uploads
 /vendor
-
-# User uploaded images (jangan commit ke git - terlalu besar!)
-/public/uploads
-/public/uploads/*
-!/public/uploads/.gitkeep
 Homestead.json
 Homestead.yaml
 Thumbs.db
