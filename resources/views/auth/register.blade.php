@@ -193,6 +193,32 @@
             z-index: 1;
         }
 
+        .toggle-password {
+            position: absolute;
+            right: 45px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: transparent;
+            border: none;
+            padding: 0;
+            margin: 0;
+            cursor: pointer;
+            color: #666;
+            font-size: 16px;
+            z-index: 2;
+            width: auto;
+            height: auto;
+        }
+
+        .toggle-password:focus {
+            outline: none;
+        }
+
+        #password,
+        #password_confirmation {
+            padding-right: 65px;
+        }
+
         .form-control {
             width: 100%;
             padding: 14px 18px 14px 45px;
@@ -698,6 +724,9 @@
                 <div class="input-group">
                     <i class="fas fa-lock"></i>
                     <input type="password" name="password" id="password" class="form-control" placeholder="Enter password (min 6 characters)" required>
+                    <button type="button" class="toggle-password" data-target="password" aria-label="Toggle password visibility">
+                        <i class="fas fa-eye-slash"></i>
+                    </button>
                 </div>
                 <span class="error-message" id="passwordError"></span>
             </div>
@@ -707,6 +736,9 @@
                 <div class="input-group">
                     <i class="fas fa-lock"></i>
                     <input type="password" name="password_confirmation" id="password_confirmation" class="form-control" placeholder="Re-enter password" required>
+                    <button type="button" class="toggle-password" data-target="password_confirmation" aria-label="Toggle confirm password visibility">
+                        <i class="fas fa-eye-slash"></i>
+                    </button>
                 </div>
                 <span class="error-message" id="confirmError"></span>
             </div>
@@ -772,6 +804,33 @@
                     confirmButtonColor: '#667eea'
                 });
             }
+        });
+
+        // Toggle show/hide password fields
+        document.addEventListener('DOMContentLoaded', function () {
+            const toggleButtons = document.querySelectorAll('.toggle-password');
+            toggleButtons.forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    const targetId = this.getAttribute('data-target');
+                    const input = document.getElementById(targetId);
+                    if (!input) return;
+
+                    const icon = this.querySelector('i');
+                    if (input.type === 'password') {
+                        input.type = 'text';
+                        if (icon) {
+                            icon.classList.remove('fa-eye-slash');
+                            icon.classList.add('fa-eye');
+                        }
+                    } else {
+                        input.type = 'password';
+                        if (icon) {
+                            icon.classList.remove('fa-eye');
+                            icon.classList.add('fa-eye-slash');
+                        }
+                    }
+                });
+            });
         });
 
         // Show success message if exists
