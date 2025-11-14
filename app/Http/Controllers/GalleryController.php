@@ -971,7 +971,7 @@ class GalleryController extends Controller
             $validated = $request->validate([
                 'foto_id' => 'nullable|integer',
                 'user_id' => 'nullable|integer',
-                'activity_type' => 'required|string|in:like,comment,report,view,bookmark,share',
+                'activity_type' => 'required|string|in:like,comment,report,view,bookmark,share,download',
                 'content' => 'nullable|string',
                 'comment_id' => 'nullable|integer'
             ]);

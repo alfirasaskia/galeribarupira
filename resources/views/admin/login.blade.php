@@ -219,6 +219,31 @@
             z-index: 1;
         }
 
+        .toggle-password {
+            position: absolute;
+            right: 45px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: transparent;
+            border: none;
+            padding: 0;
+            margin: 0;
+            cursor: pointer;
+            color: #666;
+            font-size: 16px;
+            z-index: 2;
+            width: auto;
+            height: auto;
+        }
+
+        .toggle-password:focus {
+            outline: none;
+        }
+
+        #adminPassword {
+            padding-right: 65px;
+        }
+
         input {
             background: #f8f9fa;
             border: 1px solid #e0e0e0;
@@ -486,7 +511,10 @@
                     <label class="input-label">Password</label>
                     <div style="position: relative;">
                         <i class="fas fa-lock"></i>
-                        <input type="password" name="password" placeholder="Enter Admin Password" required />
+                        <input id="adminPassword" type="password" name="password" placeholder="Enter Admin Password" required />
+                        <button type="button" class="toggle-password" data-target="adminPassword" aria-label="Toggle password visibility">
+                            <i class="fas fa-eye-slash"></i>
+                        </button>
                     </div>
                 </div>
                 
@@ -497,10 +525,10 @@
                     Don't have an admin account? <a href="{{ route('admin.register') }}">Sign up</a>
                 </div>
 
-                <!-- Back to User Login Link -->
+                <!-- Back to Home Link -->
                 <div class="back-link">
-                    <a href="{{ route('login') }}">
-                        <i class="fas fa-arrow-left"></i> Back to User Login
+                    <a href="{{ route('home') }}">
+                        <i class="fas fa-arrow-left"></i> Back to Home
                     </a>
                 </div>
             </form>
@@ -508,6 +536,33 @@
     </div>
 
     <script>
+        // Toggle show/hide password
+        document.addEventListener('DOMContentLoaded', function () {
+            const toggleButtons = document.querySelectorAll('.toggle-password');
+            toggleButtons.forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    const targetId = this.getAttribute('data-target');
+                    const input = document.getElementById(targetId);
+                    if (!input) return;
+
+                    const icon = this.querySelector('i');
+                    if (input.type === 'password') {
+                        input.type = 'text';
+                        if (icon) {
+                            icon.classList.remove('fa-eye-slash');
+                            icon.classList.add('fa-eye');
+                        }
+                    } else {
+                        input.type = 'password';
+                        if (icon) {
+                            icon.classList.remove('fa-eye');
+                            icon.classList.add('fa-eye-slash');
+                        }
+                    }
+                });
+            });
+        });
+
         // Form submission with loading state
         document.getElementById('loginForm').addEventListener('submit', function(e) {
             const submitBtn = this.querySelector('button[type="submit"]');

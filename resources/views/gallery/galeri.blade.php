@@ -3317,7 +3317,7 @@
         }
         
         // Handle Download Direct - No Login Check
-        function handleDownloadDirect(fileUrl, judul) {
+        function handleDownloadDirect(fileUrl, judul, fotoId) {
             console.log('handleDownloadDirect called');
             
             // Show downloading toast
@@ -3330,6 +3330,23 @@
                 toast: true,
                 position: 'top-end'
             });
+            
+            // Track download activity
+            if (fotoId) {
+                fetch('/api/track-activity', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    },
+                    body: JSON.stringify({
+                        foto_id: fotoId,
+                        user_id: isUserLoggedIn ? currentUser?.id : null,
+                        activity_type: 'download',
+                        content: 'Download foto: ' + judul
+                    })
+                }).catch(err => console.log('Track activity error:', err));
+            }
             
             // Create temporary link and trigger download
             const link = document.createElement('a');
@@ -3355,7 +3372,7 @@
         }
         
         // Handle Download Function - iPhone Style
-        function handleDownload(fileUrl, judul, event) {
+        function handleDownload(fileUrl, judul, event, fotoId) {
             console.log('handleDownload called');
             
             // STOP event dulu
@@ -3384,6 +3401,23 @@
                     popup: 'rounded-4'
                 }
             });
+            
+            // Track download activity
+            if (fotoId) {
+                fetch('/api/track-activity', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    },
+                    body: JSON.stringify({
+                        foto_id: fotoId,
+                        user_id: currentUser?.id,
+                        activity_type: 'download',
+                        content: 'Download foto: ' + judul
+                    })
+                }).catch(err => console.log('Track activity error:', err));
+            }
             
             // Create temporary link and trigger download
             const link = document.createElement('a');
@@ -3450,7 +3484,7 @@
                 title: '<i class="bi bi-three-dots-vertical"></i> Opsi Foto',
                 html: `
                     <div class="text-center" style="max-width: 350px; margin: 0 auto;">
-                        <button class="btn btn-outline-dark w-100 mb-2" onclick="Swal.close(); setTimeout(() => handleDownloadDirect('${downloadData?.url || ''}', '${downloadData?.title || 'foto'}'), 300);" style="padding: 14px 20px; font-size: 1rem; border-width: 2px;">
+                        <button class="btn btn-outline-dark w-100 mb-2" onclick="Swal.close(); setTimeout(() => handleDownloadDirect('${downloadData?.url || ''}', '${downloadData?.title || 'foto'}', ${fotoId}), 300);" style="padding: 14px 20px; font-size: 1rem; border-width: 2px;">
                             <i class="bi bi-download me-2"></i>Download Foto
                         </button>
                         <button class="btn btn-outline-danger w-100 mb-3" onclick="Swal.close(); setTimeout(() => handleReportNew(${fotoId}), 300);" style="padding: 14px 20px; font-size: 1rem; border-width: 2px;">
