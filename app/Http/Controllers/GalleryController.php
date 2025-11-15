@@ -252,14 +252,6 @@ class GalleryController extends Controller
 
     
 
-    public function informasi()
-    {
-        // Ambil data untuk halaman informasi
-        $kategoris = DB::table('kategori')->get();
-
-        return view('gallery.informasi', compact('kategoris'));
-    }
-
     public function tim()
     {
         // Ambil data untuk halaman tim
@@ -1527,14 +1519,6 @@ class GalleryController extends Controller
         $kategoris = DB::table('kategori')->get();
 
         return view('gallery.kategori', compact('kategoris'));
-    }
-
-    public function informasi()
-    {
-        // Ambil data untuk halaman informasi
-        $kategoris = DB::table('kategori')->get();
-
-        return view('gallery.informasi', compact('kategoris'));
     }
 
     public function tim()
