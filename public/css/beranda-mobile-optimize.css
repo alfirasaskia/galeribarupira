@@ -1,0 +1,364 @@
+/* ============================================
+   BERANDA MOBILE OPTIMIZATION
+   - Kurangi animasi berat
+   - Buat responsive mobile
+   - Perkecil ukuran file
+   - TIDAK mengubah tampilan
+   ============================================ */
+
+/* Disable heavy animations on mobile */
+@media (max-width: 768px) {
+    /* Disable AOS animations on mobile untuk performa lebih baik */
+    [data-aos] {
+        opacity: 1 !important;
+        transform: none !important;
+        transition: none !important;
+    }
+
+    /* Reduce animation duration */
+    * {
+        animation-duration: 0.1s !important;
+    }
+
+    /* Optimize swiper on mobile */
+    .swiper {
+        overflow: hidden;
+    }
+
+    .swiper-slide {
+        transition-duration: 300ms;
+    }
+
+    /* Reduce transition on mobile */
+    * {
+        transition-duration: 150ms !important;
+    }
+}
+
+/* Optimize for very small screens (360px) */
+@media (max-width: 480px) {
+    /* Reduce padding on small screens */
+    .container {
+        padding-left: 0.75rem !important;
+        padding-right: 0.75rem !important;
+    }
+
+    /* Optimize hero section for mobile */
+    .hero-section {
+        height: 60vh;
+        min-height: 400px;
+    }
+
+    /* Optimize gallery cards */
+    .gallery-card {
+        height: auto;
+        aspect-ratio: 1 / 1;
+    }
+
+    /* Optimize news cards */
+    .news-card {
+        height: auto;
+    }
+
+    .news-image {
+        height: 180px;
+    }
+
+    /* Reduce font sizes on mobile */
+    .hero-title {
+        font-size: 1.5rem !important;
+    }
+
+    .section-title {
+        font-size: 1.5rem !important;
+    }
+
+    /* Optimize button sizes */
+    .btn {
+        padding: 0.4rem 0.8rem !important;
+        font-size: 0.85rem !important;
+    }
+
+    /* Disable hover effects on touch devices */
+    @media (hover: none) {
+        .card:hover,
+        .news-card:hover,
+        .gallery-card:hover,
+        .btn:hover {
+            transform: none !important;
+            box-shadow: none !important;
+        }
+    }
+}
+
+/* Lazy loading optimization */
+img {
+    loading: lazy;
+}
+
+/* Optimize will-change untuk smooth scroll */
+.navbar {
+    will-change: transform, background-color;
+}
+
+.gallery-card,
+.news-card,
+.testimoni-card {
+    will-change: transform;
+}
+
+/* Reduce motion untuk accessibility */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+/* Optimize text rendering */
+body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Optimize image rendering */
+img {
+    image-rendering: -webkit-optimize-contrast;
+}
+
+/* Disable animations on reduced motion */
+@media (prefers-reduced-motion: reduce) {
+    [data-aos] {
+        opacity: 1 !important;
+        transform: none !important;
+    }
+}
+
+/* Optimize Swiper for mobile */
+@media (max-width: 768px) {
+    .swiper-button-prev,
+    .swiper-button-next {
+        display: none;
+    }
+
+    .swiper-pagination {
+        bottom: 10px;
+    }
+}
+
+/* Reduce shadow effects on mobile */
+@media (max-width: 768px) {
+    .shadow,
+    .shadow-sm,
+    .shadow-md,
+    .shadow-lg {
+        box-shadow: none !important;
+    }
+}
+
+/* Optimize navbar on mobile */
+@media (max-width: 768px) {
+    .navbar {
+        height: 60px;
+        padding: 0.5rem 0;
+    }
+
+    .navbar-brand {
+        font-size: 1rem;
+    }
+
+    .nav-link {
+        font-size: 0.9rem;
+    }
+}
+
+/* Optimize hero content on mobile */
+@media (max-width: 768px) {
+    .hero-content {
+        padding: 2rem 1rem;
+    }
+
+    .hero-title {
+        line-height: 1.2;
+    }
+}
+
+/* Optimize section padding on mobile */
+@media (max-width: 768px) {
+    .content-section {
+        padding: 2rem 0 !important;
+    }
+
+    .section-title {
+        margin-bottom: 0.5rem !important;
+    }
+}
+
+/* Optimize grid on mobile */
+@media (max-width: 768px) {
+    .gallery-grid,
+    .news-grid,
+    .testimoni-grid {
+        grid-template-columns: 1fr !important;
+        gap: 1rem !important;
+    }
+}
+
+/* Disable complex filters on mobile */
+@media (max-width: 768px) {
+    .filter-backdrop {
+        backdrop-filter: none !important;
+    }
+}
+
+/* Optimize form elements on mobile */
+@media (max-width: 768px) {
+    input,
+    textarea,
+    select,
+    button {
+        font-size: 16px; /* Prevent zoom on iOS */
+    }
+}
+
+/* ============================================
+   JURUSAN CARD MOBILE OPTIMIZATION
+   ============================================ */
+
+/* Mobile responsive untuk jurusan card */
+@media (max-width: 768px) {
+    .jurusan-card {
+        min-height: auto !important;
+        padding: 1rem !important;
+    }
+
+    .jurusan-card .d-flex {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+    }
+
+    .jurusan-logo {
+        width: 80px !important;
+        height: 80px !important;
+        margin-bottom: 0.5rem !important;
+    }
+
+    .jurusan-card h4 {
+        font-size: 1.1rem !important;
+        margin-bottom: 0.25rem !important;
+    }
+
+    .jurusan-card .text-muted {
+        font-size: 0.85rem !important;
+        margin-bottom: 0.75rem !important;
+    }
+
+    .jurusan-meta {
+        gap: 0.5rem !important;
+        margin-bottom: 0.75rem !important;
+    }
+
+    .jurusan-meta-item {
+        font-size: 0.8rem !important;
+    }
+
+    .jurusan-features {
+        gap: 0.35rem !important;
+        margin-bottom: 1rem !important;
+    }
+
+    .feature-tag {
+        font-size: 0.7rem !important;
+        padding: 0.25rem 0.5rem !important;
+    }
+
+    .detail-btn {
+        width: 100% !important;
+        padding: 0.6rem 1rem !important;
+        font-size: 0.9rem !important;
+    }
+}
+
+/* Extra small screens */
+@media (max-width: 480px) {
+    .jurusan-card {
+        min-height: auto !important;
+        padding: 0.75rem !important;
+    }
+
+    .jurusan-logo {
+        width: 70px !important;
+        height: 70px !important;
+    }
+
+    .jurusan-card h4 {
+        font-size: 1rem !important;
+    }
+
+    .jurusan-card .text-muted {
+        font-size: 0.8rem !important;
+    }
+
+    .jurusan-meta-item {
+        font-size: 0.75rem !important;
+    }
+
+    .feature-tag {
+        font-size: 0.65rem !important;
+    }
+
+    .detail-btn {
+        padding: 0.5rem 0.75rem !important;
+        font-size: 0.85rem !important;
+    }
+}
+
+/* Very small screens */
+@media (max-width: 360px) {
+    .jurusan-card {
+        padding: 0.5rem !important;
+    }
+
+    .jurusan-logo {
+        width: 60px !important;
+        height: 60px !important;
+    }
+
+    .jurusan-card h4 {
+        font-size: 0.95rem !important;
+    }
+
+    .jurusan-card .text-muted {
+        font-size: 0.75rem !important;
+    }
+
+    .feature-tag {
+        font-size: 0.6rem !important;
+        padding: 0.2rem 0.4rem !important;
+    }
+}
+
+/* Reduce animation complexity */
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (max-width: 768px) {
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+        }
+        to {
+            opacity: 1;
+        }
+    }
+}

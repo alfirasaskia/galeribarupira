@@ -1,0 +1,83 @@
+/* ============================================
+   BERANDA PERFORMANCE OPTIMIZATION
+   Hanya optimasi performa, TIDAK mengubah tampilan
+   ============================================ */
+
+/* Lazy Loading untuk Gambar */
+img[data-src] {
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+img[data-src].loaded {
+    opacity: 1;
+}
+
+/* Optimize animations - reduce motion untuk accessibility */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+/* Optimize will-change untuk smooth animations */
+.hero-slide,
+.news-card,
+.gallery-card,
+.jurusan-card,
+.testimoni-card {
+    will-change: transform, opacity;
+}
+
+/* Optimize scroll performance */
+.navbar {
+    will-change: transform, background-color, box-shadow;
+}
+
+/* Optimize button hover */
+.btn {
+    will-change: transform, background-color, color, border-color;
+}
+
+/* Optimize card hover */
+.card {
+    will-change: transform, box-shadow;
+}
+
+/* Optimize image loading */
+picture {
+    display: block;
+}
+
+/* Optimize form elements */
+input,
+textarea,
+select,
+button {
+    font: inherit;
+    max-width: 100%;
+}
+
+/* Optimize text rendering */
+body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Optimize link performance */
+a {
+    transition: all 0.2s ease;
+}
+
+/* Optimize hover state untuk touch devices */
+@media (hover: none) {
+    .card:hover,
+    .news-card:hover,
+    .gallery-card:hover,
+    .btn:hover {
+        transform: none !important;
+    }
+}

@@ -13,6 +13,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ asset('css/beranda-mobile-optimize.css') }}">
     <script src="https://www.google.com/recaptcha/api.js?render=6Ld0ffcrAAAAAOtioZEl4nY5fpoJB745yD7yZesv"></script>
     <style>
         * {
@@ -5944,6 +5945,7 @@
             }
         });
     </script>
+    <script src="{{ asset('js/beranda-mobile-optimize.js') }}" defer></script>
 </body>
 </html>
 
