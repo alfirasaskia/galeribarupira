@@ -563,7 +563,7 @@
                 </a>
             </div>
             <div class="nav-item">
-                <a href="{{ route('admin.photos') }}" class="nav-link side">
+                <a href="{{ route('admin.photos.index') }}" class="nav-link side">
                     <i class="fas fa-images"></i>Kelola Galeri
                 </a>
             </div>
@@ -578,7 +578,7 @@
                 </a>
             </div>
             <div class="nav-item">
-                <a href="{{ route('admin.suggestions') }}" class="nav-link side active" style="position: relative;">
+                <a href="{{ route('admin.suggestions.index') }}" class="nav-link side active" style="position: relative;">
                     <i class="fas fa-inbox"></i>Kotak Masuk
                     @if($unreadCount > 0)
                         <span class="badge bg-danger rounded-pill" style="position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); font-size: 0.75rem; padding: 0.25rem 0.5rem;">{{ $unreadCount }}</span>

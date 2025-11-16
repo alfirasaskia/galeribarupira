@@ -566,7 +566,7 @@
                 </a>
             </div>
             <div class="nav-item" style="margin: 0.5rem 1rem;">
-                <a href="{{ route('admin.suggestions') }}" class="nav-link side" style="display:flex;align-items:center;padding:0.875rem 1.25rem;color:rgba(255,255,255,0.7);text-decoration:none;border-radius:10px;transition:all 0.3s ease;font-weight:500;font-size:0.9rem;">
+                <a href="{{ route('admin.suggestions.index') }}" class="nav-link side" style="display:flex;align-items:center;padding:0.875rem 1.25rem;color:rgba(255,255,255,0.7);text-decoration:none;border-radius:10px;transition:all 0.3s ease;font-weight:500;font-size:0.9rem;">
                     <i class="fas fa-inbox" style="margin-right:1rem;width:20px;font-size:1rem;"></i>Kotak Masuk
                     @if(isset($unreadSuggestionsCount) && $unreadSuggestionsCount > 0)
                         <span class="badge bg-danger ms-2">{{ $unreadSuggestionsCount }}</span>

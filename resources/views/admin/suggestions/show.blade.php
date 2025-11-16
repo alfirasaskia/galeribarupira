@@ -540,7 +540,7 @@
                 </a>
             </div>
             <div class="nav-item">
-                <a href="{{ route('admin.suggestions') }}" class="nav-link active" style="position: relative;">
+                <a href="{{ route('admin.suggestions.index') }}" class="nav-link active" style="position: relative;">
                     <i class="fas fa-inbox"></i>
                     Kotak Masuk
                     @if(isset($unreadCount) && $unreadCount > 0)
@@ -686,7 +686,7 @@
             @endif
 
             <div class="action-buttons">
-                <a href="{{ route('admin.suggestions') }}" class="btn btn-secondary">
+                <a href="{{ route('admin.suggestions.index') }}" class="btn btn-secondary">
                     <i class="fas fa-arrow-left me-2"></i>
                     Kembali
                 </a>
@@ -1248,7 +1248,7 @@
                 </a>
             </div>
             <div class="nav-item">
-                <a href="{{ route('admin.suggestions') }}" class="nav-link active" style="position: relative;">
+                <a href="{{ route('admin.suggestions.index') }}" class="nav-link active" style="position: relative;">
                     <i class="fas fa-inbox"></i>
                     Kotak Masuk
                     @if(isset($unreadCount) && $unreadCount > 0)
@@ -1397,7 +1397,7 @@
             @endif
 
             <div class="action-buttons">
-                <a href="{{ route('admin.suggestions') }}" class="btn btn-secondary">
+                <a href="{{ route('admin.suggestions.index') }}" class="btn btn-secondary">
                     <i class="fas fa-arrow-left me-2"></i>
                     Kembali
                 </a>
@@ -1959,7 +1959,7 @@
                 </a>
             </div>
             <div class="nav-item">
-                <a href="{{ route('admin.suggestions') }}" class="nav-link active" style="position: relative;">
+                <a href="{{ route('admin.suggestions.index') }}" class="nav-link active" style="position: relative;">
                     <i class="fas fa-inbox"></i>
                     Kotak Masuk
                     @if(isset($unreadCount) && $unreadCount > 0)
@@ -2108,7 +2108,7 @@
             @endif
 
             <div class="action-buttons">
-                <a href="{{ route('admin.suggestions') }}" class="btn btn-secondary">
+                <a href="{{ route('admin.suggestions.index') }}" class="btn btn-secondary">
                     <i class="fas fa-arrow-left me-2"></i>
                     Kembali
                 </a>

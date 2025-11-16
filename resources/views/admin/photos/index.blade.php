@@ -113,10 +113,10 @@
         <nav class="sidebar-nav">
             <div class="nav-item"><a href="{{ route('admin.dashboard') }}" class="nav-link side"><i class="fas fa-tachometer-alt"></i>Dashboard Admin</a></div>
             <div class="nav-item"><a href="{{ route('admin.petugas') }}" class="nav-link side"><i class="fas fa-users"></i>Manajemen Admin</a></div>
-            <div class="nav-item"><a href="{{ route('admin.photos') }}" class="nav-link side active"><i class="fas fa-images"></i>Kelola Galeri</a></div>
+            <div class="nav-item"><a href="{{ route('admin.photos.index') }}" class="nav-link side active"><i class="fas fa-images"></i>Kelola Galeri</a></div>
             <div class="nav-item"><a href="{{ route('admin.categories.index') }}" class="nav-link side"><i class="fas fa-folder-open"></i>Kelola Kategori</a></div>
             <div class="nav-item"><a href="{{ route('admin.agenda') }}" class="nav-link side"><i class="fas fa-calendar-alt"></i>Kelola Agenda</a></div>
-            <div class="nav-item"><a href="{{ route('admin.suggestions') }}" class="nav-link side"><i class="fas fa-inbox"></i>Kotak Masuk @if(isset($unreadSuggestionsCount) && $unreadSuggestionsCount > 0)<span class="badge bg-danger ms-2">{{ $unreadSuggestionsCount }}</span>@endif</a></div>
+            <div class="nav-item"><a href="{{ route('admin.suggestions.index') }}" class="nav-link side"><i class="fas fa-inbox"></i>Kotak Masuk @if(isset($unreadSuggestionsCount) && $unreadSuggestionsCount > 0)<span class="badge bg-danger ms-2">{{ $unreadSuggestionsCount }}</span>@endif</a></div>
             <div class="nav-divider"></div>
             <div class="nav-item"><a href="{{ route('admin.berita.index') }}" class="nav-link side"><i class="fas fa-newspaper"></i>Kelola Berita</a></div>
             <div class="nav-item"><a href="{{ route('admin.reports') }}" class="nav-link side"><i class="fas fa-chart-line"></i>Laporan Aktivitas</a></div>

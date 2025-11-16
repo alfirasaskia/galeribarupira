@@ -435,7 +435,7 @@
                 </a>
             </div>
             <div class="nav-item">
-                <a href="{{ route('admin.suggestions') }}" class="nav-link side">
+                <a href="{{ route('admin.suggestions.index') }}" class="nav-link side">
                     <i class="fas fa-inbox"></i>Kotak Masuk
                     @if(isset($unreadSuggestionsCount) && $unreadSuggestionsCount > 0)
                         <span class="badge bg-danger ms-2">{{ $unreadSuggestionsCount }}</span>

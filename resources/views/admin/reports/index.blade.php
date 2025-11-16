@@ -304,7 +304,7 @@
             <a href="{{ route('admin.agenda.index') }}" class="nav-link">
                 <i class="fas fa-calendar"></i> Kelola Agenda
             </a>
-            <a href="{{ route('admin.suggestions') }}" class="nav-link">
+            <a href="{{ route('admin.suggestions.index') }}" class="nav-link">
                 <i class="fas fa-inbox"></i> Kotak Masuk
                 @if(isset($unreadSuggestionsCount) && $unreadSuggestionsCount > 0)
                     <span class="badge bg-danger ms-2">{{ $unreadSuggestionsCount }}</span>

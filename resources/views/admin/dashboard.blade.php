@@ -1863,7 +1863,7 @@
                 </a>
             </div>
             <div class="nav-item">
-                <a href="{{ route('admin.photos') }}" class="nav-link">
+                <a href="{{ route('admin.photos.index') }}" class="nav-link">
                     <i class="fas fa-images"></i>
                     Kelola Galeri
                 </a>
@@ -1881,7 +1881,7 @@
                 </a>
             </div>
             <div class="nav-item">
-                <a href="{{ route('admin.suggestions') }}" class="nav-link" style="position: relative;">
+                <a href="{{ route('admin.suggestions.index') }}" class="nav-link" style="position: relative;">
                     <i class="fas fa-inbox"></i>
                     Kotak Masuk
                     @if(isset($unreadCount) && $unreadCount > 0)
