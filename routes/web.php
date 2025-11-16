@@ -7,9 +7,14 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\OtpController;
 use App\Http\Controllers\RatingController;
 
+// ============================================
+// ROOT ROUTE - Halaman Beranda
+// ============================================
 Route::get('/', [GalleryController::class, 'beranda'])->name('home');
 
-// Auth Routes
+// ============================================
+// AUTH ROUTES
+// ============================================
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'processLogin'])->name('login.process');
 Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
@@ -42,10 +47,10 @@ Route::get('/access', function () {
 Route::get('/gallery', [GalleryController::class, 'index'])->name('gallery.index');
 Route::get('/gallery/{id}', [GalleryController::class, 'show'])->name('gallery.show');
 
-// Home and Beranda routes (both point to the same controller method)
+// Beranda route
 Route::get('/beranda', [GalleryController::class, 'beranda'])->name('gallery.beranda');
-// Make sure the root URL also uses the same controller method
-Route::get('/', [GalleryController::class, 'beranda'])->name('home');
+
+// Galeri route
 Route::get('/galeri', [GalleryController::class, 'galeri'])->name('gallery.galeri');
 // Redirect my-bookmarks to user profile bookmarks tab
 Route::get('/my-bookmarks', function() {
