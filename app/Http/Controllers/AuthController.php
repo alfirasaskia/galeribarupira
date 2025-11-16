@@ -186,19 +186,33 @@ class AuthController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email',
+            'email' => 'required|email',
             'password' => 'required|min:6|confirmed'
         ], [
             'name.required' => 'Nama lengkap harus diisi',
             'email.required' => 'Email harus diisi',
             'email.email' => 'Format email tidak valid',
-            'email.unique' => 'Email sudah terdaftar',
             'password.required' => 'Password harus diisi',
             'password.min' => 'Password minimal 6 karakter',
             'password.confirmed' => 'Konfirmasi password tidak cocok'
         ]);
         
         try {
+            // Cek apakah email sudah terdaftar dan TERVERIFIKASI
+            $existingUser = DB::table('users')->where('email', $request->email)->whereNotNull('email_verified_at')->first();
+            if ($existingUser) {
+                return back()->withErrors(['email' => 'Email sudah terdaftar'])->withInput();
+            }
+            
+            // Jika email ada tapi belum terverifikasi, hapus user lama dan OTP-nya
+            $unverifiedUser = DB::table('users')->where('email', $request->email)->whereNull('email_verified_at')->first();
+            if ($unverifiedUser) {
+                // Hapus OTP yang terkait
+                DB::table('otps')->where('user_id', $unverifiedUser->id)->delete();
+                // Hapus user yang belum terverifikasi
+                DB::table('users')->where('id', $unverifiedUser->id)->delete();
+            }
+            
             // Insert new user (email_verified_at masih NULL)
             $userId = DB::table('users')->insertGetId([
                 'name' => $request->name,
