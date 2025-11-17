@@ -2713,7 +2713,12 @@
                         user_id: currentUser?.id || null,
                         activity_type: 'like'
                     })
-                }).then(response => response.json())
+                }).then(response => {
+                      if (!response.ok) {
+                          throw new Error('Network response was not ok');
+                      }
+                      return response.json();
+                  })
                   .then(data => {
                       console.log('Activity tracked:', data);
                       
@@ -2722,8 +2727,10 @@
                           if (data.action === 'liked') {
                               // LIKE - Tambah like
                               likeBtn.classList.add('liked');
-                              icon.classList.remove('bi-heart');
-                              icon.classList.add('bi-heart-fill');
+                              if (icon) {
+                                  icon.classList.remove('bi-heart');
+                                  icon.classList.add('bi-heart-fill');
+                              }
                               
                               // Animasi bounce
                               likeBtn.style.transform = 'scale(1.3)';
@@ -2733,8 +2740,10 @@
                           } else if (data.action === 'unliked') {
                               // UNLIKE - Kurangi like
                               likeBtn.classList.remove('liked');
-                              icon.classList.remove('bi-heart-fill');
-                              icon.classList.add('bi-heart');
+                              if (icon) {
+                                  icon.classList.remove('bi-heart-fill');
+                                  icon.classList.add('bi-heart');
+                              }
                               
                               // Show unlike message
                               Swal.fire({
@@ -2752,11 +2761,31 @@
                           if (likesCountSpan && data.total_likes !== undefined) {
                               likesCountSpan.textContent = data.total_likes;
                           }
+                      } else {
+                          // Show error message if like failed
+                          Swal.fire({
+                              icon: 'error',
+                              title: 'Error',
+                              text: data.message || 'Gagal menyukai foto',
+                              timer: 2000,
+                              showConfirmButton: false,
+                              toast: true,
+                              position: 'top-end'
+                          });
                       }
                   })
                   .catch(error => {
-                          console.error('Failed to track activity:', error);
+                      console.error('Failed to track activity:', error);
+                      Swal.fire({
+                          icon: 'error',
+                          title: 'Error',
+                          text: 'Gagal menyukai foto. Silakan coba lagi.',
+                          timer: 2000,
+                          showConfirmButton: false,
+                          toast: true,
+                          position: 'top-end'
                       });
+                  });
             }
             
             return false; // CRITICAL: Prevent any default action
@@ -3318,7 +3347,20 @@
         
         // Handle Download Direct - No Login Check
         function handleDownloadDirect(fileUrl, judul, fotoId) {
-            console.log('handleDownloadDirect called');
+            console.log('handleDownloadDirect called', { fileUrl, judul, fotoId });
+            
+            if (!fileUrl) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'URL foto tidak valid',
+                    timer: 2000,
+                    showConfirmButton: false,
+                    toast: true,
+                    position: 'top-end'
+                });
+                return;
+            }
             
             // Show downloading toast
             Swal.fire({
@@ -3337,7 +3379,7 @@
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
                     },
                     body: JSON.stringify({
                         foto_id: fotoId,
@@ -3348,32 +3390,75 @@
                 }).catch(err => console.log('Track activity error:', err));
             }
             
-            // Create temporary link and trigger download
-            const link = document.createElement('a');
-            link.href = fileUrl;
-            link.download = judul.replace(/[^a-z0-9]/gi, '_').toLowerCase() + '.jpg';
-            link.target = '_blank';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            
-            // Show success message
-            setTimeout(() => {
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Berhasil!',
-                    text: 'Foto berhasil diunduh',
-                    timer: 2000,
-                    showConfirmButton: false,
-                    toast: true,
-                    position: 'top-end'
+            // Try to download using fetch for better cross-origin support
+            fetch(fileUrl)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.blob();
+                })
+                .then(blob => {
+                    // Create blob URL
+                    const blobUrl = window.URL.createObjectURL(blob);
+                    
+                    // Create temporary link and trigger download
+                    const link = document.createElement('a');
+                    link.href = blobUrl;
+                    link.download = (judul || 'foto').replace(/[^a-z0-9]/gi, '_').toLowerCase() + '.jpg';
+                    link.style.display = 'none';
+                    document.body.appendChild(link);
+                    link.click();
+                    
+                    // Clean up
+                    setTimeout(() => {
+                        document.body.removeChild(link);
+                        window.URL.revokeObjectURL(blobUrl);
+                    }, 100);
+                    
+                    // Show success message
+                    setTimeout(() => {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Berhasil!',
+                            text: 'Foto berhasil diunduh',
+                            timer: 2000,
+                            showConfirmButton: false,
+                            toast: true,
+                            position: 'top-end'
+                        });
+                    }, 500);
+                })
+                .catch(error => {
+                    console.error('Download error:', error);
+                    // Fallback to direct link download
+                    const link = document.createElement('a');
+                    link.href = fileUrl;
+                    link.download = (judul || 'foto').replace(/[^a-z0-9]/gi, '_').toLowerCase() + '.jpg';
+                    link.target = '_blank';
+                    link.style.display = 'none';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    
+                    // Show success message
+                    setTimeout(() => {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Berhasil!',
+                            text: 'Foto berhasil diunduh',
+                            timer: 2000,
+                            showConfirmButton: false,
+                            toast: true,
+                            position: 'top-end'
+                        });
+                    }, 500);
                 });
-            }, 1500);
         }
         
         // Handle Download Function - iPhone Style
         function handleDownload(fileUrl, judul, event, fotoId) {
-            console.log('handleDownload called');
+            console.log('handleDownload called', { fileUrl, judul, fotoId });
             
             // STOP event dulu
             if (event) {
@@ -3385,6 +3470,19 @@
             if (!isUserLoggedIn) {
                 sessionStorage.setItem('intended_url', window.location.href);
                 window.location.href = '/login';
+                return false;
+            }
+            
+            if (!fileUrl) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'URL foto tidak valid',
+                    timer: 2000,
+                    showConfirmButton: false,
+                    toast: true,
+                    position: 'top-end'
+                });
                 return false;
             }
             
@@ -3408,41 +3506,89 @@
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
                     },
                     body: JSON.stringify({
                         foto_id: fotoId,
                         user_id: currentUser?.id,
                         activity_type: 'download',
-                        content: 'Download foto: ' + judul
+                        content: 'Download foto: ' + (judul || 'foto')
                     })
                 }).catch(err => console.log('Track activity error:', err));
             }
             
-            // Create temporary link and trigger download
-            const link = document.createElement('a');
-            link.href = fileUrl;
-            link.download = judul.replace(/[^a-z0-9]/gi, '_').toLowerCase() + '.jpg';
-            link.target = '_blank';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            
-            // Show success message after a delay
-            setTimeout(() => {
-                Swal.fire({
-                    icon: 'success',
-                    title: '<i class="bi bi-check-circle" style="color: #34C759;"></i> Berhasil!',
-                    html: `<p style="color: #666;">Foto berhasil diunduh</p>`,
-                    timer: 2000,
-                    showConfirmButton: false,
-                    toast: true,
-                    position: 'top-end',
-                    customClass: {
-                        popup: 'rounded-4'
+            // Try to download using fetch for better cross-origin support
+            fetch(fileUrl)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
                     }
+                    return response.blob();
+                })
+                .then(blob => {
+                    // Create blob URL
+                    const blobUrl = window.URL.createObjectURL(blob);
+                    
+                    // Create temporary link and trigger download
+                    const link = document.createElement('a');
+                    link.href = blobUrl;
+                    link.download = (judul || 'foto').replace(/[^a-z0-9]/gi, '_').toLowerCase() + '.jpg';
+                    link.style.display = 'none';
+                    document.body.appendChild(link);
+                    link.click();
+                    
+                    // Clean up
+                    setTimeout(() => {
+                        document.body.removeChild(link);
+                        window.URL.revokeObjectURL(blobUrl);
+                    }, 100);
+                    
+                    // Show success message after a delay
+                    setTimeout(() => {
+                        Swal.fire({
+                            icon: 'success',
+                            title: '<i class="bi bi-check-circle" style="color: #34C759;"></i> Berhasil!',
+                            html: `<p style="color: #666;">Foto berhasil diunduh</p>`,
+                            timer: 2000,
+                            showConfirmButton: false,
+                            toast: true,
+                            position: 'top-end',
+                            customClass: {
+                                popup: 'rounded-4'
+                            }
+                        });
+                    }, 500);
+                })
+                .catch(error => {
+                    console.error('Download error:', error);
+                    // Fallback to direct link download
+                    const link = document.createElement('a');
+                    link.href = fileUrl;
+                    link.download = (judul || 'foto').replace(/[^a-z0-9]/gi, '_').toLowerCase() + '.jpg';
+                    link.target = '_blank';
+                    link.style.display = 'none';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    
+                    // Show success message after a delay
+                    setTimeout(() => {
+                        Swal.fire({
+                            icon: 'success',
+                            title: '<i class="bi bi-check-circle" style="color: #34C759;"></i> Berhasil!',
+                            html: `<p style="color: #666;">Foto berhasil diunduh</p>`,
+                            timer: 2000,
+                            showConfirmButton: false,
+                            toast: true,
+                            position: 'top-end',
+                            customClass: {
+                                popup: 'rounded-4'
+                            }
+                        });
+                    }, 500);
                 });
-            }, 1500);
+            
+            return false;
         }
         
         // Handle Photo Options - Three Dots Menu
@@ -3467,24 +3613,35 @@
             }
             
             // Get photo data for download
-            const galleryCard = document.querySelector(`[data-foto-id="${fotoId}"]`);
-            let downloadData = null;
+            const galleryCard = document.querySelector(`.gallery-card[data-foto-id="${fotoId}"]`);
+            let downloadData = {
+                url: '',
+                title: 'Foto'
+            };
             
             if (galleryCard) {
+                // Try to get image URL from data attribute first (most reliable)
+                const imageUrl = galleryCard.dataset.imageUrl;
                 const img = galleryCard.querySelector('.gallery-image');
-                const title = galleryCard.querySelector('.gallery-photo-title')?.textContent || 'Foto';
+                const title = galleryCard.querySelector('.gallery-photo-title')?.textContent || 
+                             galleryCard.dataset.judul || 
+                             'Foto';
                 
                 downloadData = {
-                    url: img?.src || '',
+                    url: imageUrl || img?.src || '',
                     title: title
                 };
             }
+            
+            // Escape quotes in title for HTML
+            const safeTitle = (downloadData.title || 'foto').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+            const safeUrl = (downloadData.url || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
             
             Swal.fire({
                 title: '<i class="bi bi-three-dots-vertical"></i> Opsi Foto',
                 html: `
                     <div class="text-center" style="max-width: 350px; margin: 0 auto;">
-                        <button class="btn btn-outline-dark w-100 mb-2" onclick="Swal.close(); setTimeout(() => handleDownloadDirect('${downloadData?.url || ''}', '${downloadData?.title || 'foto'}', ${fotoId}), 300);" style="padding: 14px 20px; font-size: 1rem; border-width: 2px;">
+                        <button class="btn btn-outline-dark w-100 mb-2" onclick="Swal.close(); setTimeout(() => handleDownloadDirect('${safeUrl}', '${safeTitle}', ${fotoId}), 300);" style="padding: 14px 20px; font-size: 1rem; border-width: 2px;">
                             <i class="bi bi-download me-2"></i>Download Foto
                         </button>
                         <button class="btn btn-outline-danger w-100 mb-3" onclick="Swal.close(); setTimeout(() => handleReportNew(${fotoId}), 300);" style="padding: 14px 20px; font-size: 1rem; border-width: 2px;">
@@ -4626,7 +4783,7 @@
                 
                 switch(action) {
                     case 'like':
-                        window.handleLikeNoLogin(fotoId, e);
+                        window.handleLike(fotoId, e);
                         break;
                     case 'comment':
                         window.handleComment(fotoId, e);

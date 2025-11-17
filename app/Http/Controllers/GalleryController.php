@@ -973,7 +973,15 @@ class GalleryController extends Controller
             $userAgent = $request->userAgent();
             
             // Handle LIKE/UNLIKE - Toggle behavior
-            if ($validated['activity_type'] === 'like' && isset($validated['foto_id']) && isset($validated['user_id'])) {
+            if ($validated['activity_type'] === 'like' && isset($validated['foto_id'])) {
+                // Check if user_id is provided and not null
+                if (!isset($validated['user_id']) || $validated['user_id'] === null) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'User harus login untuk menyukai foto'
+                    ], 401);
+                }
+                
                 // Cek apakah user sudah like foto ini
                 $existingLike = DB::table('gallery_activities')
                     ->where('foto_id', $validated['foto_id'])
