@@ -4755,26 +4755,26 @@
             function submitFormDirectly() {
                 const formData = new FormData(contactForm);
                 
-                // Get form action and ensure it uses same protocol as current page
+                // Get form action - always use relative path to avoid CORS/mixed content
                 let formAction = contactForm.action;
                 
-                // If form action is absolute URL with http:// but page is https://, fix it
-                if (formAction.startsWith('http://') && window.location.protocol === 'https:') {
-                    formAction = formAction.replace('http://', 'https://');
-                }
-                // If form action is absolute URL but protocol doesn't match, use relative path
-                else if (formAction.startsWith('http://') || formAction.startsWith('https://')) {
-                    // Extract path from absolute URL
+                // If absolute URL, extract just the path
+                if (formAction.startsWith('http://') || formAction.startsWith('https://')) {
                     try {
                         const url = new URL(formAction);
                         formAction = url.pathname;
                     } catch (e) {
-                        // If URL parsing fails, try to extract path manually
+                        // Fallback: extract path manually
                         const match = formAction.match(/https?:\/\/[^\/]+(\/.*)/);
                         if (match) {
                             formAction = match[1];
                         }
                     }
+                }
+                
+                // Ensure it starts with /
+                if (!formAction.startsWith('/')) {
+                    formAction = '/' + formAction;
                 }
                 
                 console.log('Submitting to:', formAction);
