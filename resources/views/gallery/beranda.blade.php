@@ -14,7 +14,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('css/beranda-mobile-optimize.css') }}">
-    <script src="https://www.google.com/recaptcha/api.js?render=6Ld0ffcrAAAAAOtioZEl4nY5fpoJB745yD7yZesv"></script>
+    <script src="https://www.google.com/recaptcha/api.js?render=6Ld0ffcrAAAAAOtioZEl4nY5fpoJB745yD7yZesv" async defer onerror="console.error('reCAPTCHA script failed to load'); window.grecaptchaLoadError = true;"></script>
     <style>
         * {
             margin: 0;
@@ -4705,10 +4705,33 @@
                     // Simpan nama ke variable global sebelum form di-reset
                     window.userNamaLengkap = document.querySelector('input[name="nama_lengkap"]')?.value || 'Anonymous';
                     
-                    // Check if grecaptcha is available and ready
-                    if (typeof grecaptcha === 'undefined' || typeof grecaptcha.ready === 'undefined' || typeof grecaptcha.execute === 'undefined') {
-                        console.error('reCAPTCHA not loaded or not ready');
-                        // Fallback: submit without reCAPTCHA token (will be handled by server)
+                    // Check if grecaptcha script failed to load
+                    if (window.grecaptchaLoadError) {
+                        console.warn('reCAPTCHA script failed to load, submitting without token');
+                        document.getElementById('g-recaptcha-response').value = 'bypass';
+                        submitFormDirectly();
+                        return;
+                    }
+                    
+                    // Check if grecaptcha is available and ready - with more thorough check
+                    if (typeof grecaptcha === 'undefined') {
+                        console.warn('reCAPTCHA script not loaded, submitting without token');
+                        document.getElementById('g-recaptcha-response').value = 'bypass';
+                        submitFormDirectly();
+                        return;
+                    }
+                    
+                    // Check if grecaptcha.ready exists and is a function
+                    if (typeof grecaptcha.ready !== 'function') {
+                        console.warn('grecaptcha.ready is not a function, submitting without token');
+                        document.getElementById('g-recaptcha-response').value = 'bypass';
+                        submitFormDirectly();
+                        return;
+                    }
+                    
+                    // Additional safety check - wait a bit if grecaptcha just loaded
+                    if (!grecaptcha.ready) {
+                        console.warn('grecaptcha.ready is falsy, submitting without token');
                         document.getElementById('g-recaptcha-response').value = 'bypass';
                         submitFormDirectly();
                         return;
@@ -4723,6 +4746,15 @@
                     
                     // Execute reCAPTCHA v3 with proper error handling
                     try {
+                        // Double check before calling
+                        if (typeof grecaptcha === 'undefined' || typeof grecaptcha.ready !== 'function') {
+                            clearTimeout(recaptchaTimeout);
+                            console.warn('reCAPTCHA not available in try block, submitting without token');
+                            document.getElementById('g-recaptcha-response').value = 'bypass';
+                            submitFormDirectly();
+                            return;
+                        }
+                        
                         grecaptcha.ready(function() {
                             clearTimeout(recaptchaTimeout);
                             
