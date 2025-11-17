@@ -4735,123 +4735,123 @@
                             }
                             
                             grecaptcha.execute('6Ld0ffcrAAAAAOtioZEl4nY5fpoJB745yD7yZesv', {action: 'submit'}).then(function(token) {
-                            // Add token to form
-                            document.getElementById('g-recaptcha-response').value = token;
-                            
-                            // Submit form via AJAX
-                            const formData = new FormData(contactForm);
-                            
-                            // Use absolute URL to avoid CORS issues
-                            const formAction = contactForm.action;
-                            const url = formAction.startsWith('http') ? formAction : window.location.origin + formAction;
-                            
-                            fetch(url, {
-                                method: 'POST',
-                                body: formData,
-                                headers: {
-                                    'X-Requested-With': 'XMLHttpRequest',
-                                    'Accept': 'application/json'
-                                },
-                                credentials: 'same-origin'
-                            })
-                            .then(async response => {
-                                const contentType = response.headers.get("content-type");
-                                let errorMessage = 'Gagal mengirim pesan. Silakan coba lagi.';
+                                // Add token to form
+                                document.getElementById('g-recaptcha-response').value = token;
                                 
-                                if (response.ok) {
-                                    // Try to parse JSON response
-                                    if (contentType && contentType.includes("application/json")) {
-                                        const data = await response.json();
-                                        if (data.message) {
-                                            errorMessage = data.message;
-                                        }
-                                    }
+                                // Submit form via AJAX
+                                const formData = new FormData(contactForm);
+                                
+                                // Use absolute URL to avoid CORS issues
+                                const formAction = contactForm.action;
+                                const url = formAction.startsWith('http') ? formAction : window.location.origin + formAction;
+                                
+                                fetch(url, {
+                                    method: 'POST',
+                                    body: formData,
+                                    headers: {
+                                        'X-Requested-With': 'XMLHttpRequest',
+                                        'Accept': 'application/json'
+                                    },
+                                    credentials: 'same-origin'
+                                })
+                                .then(async response => {
+                                    const contentType = response.headers.get("content-type");
+                                    let errorMessage = 'Gagal mengirim pesan. Silakan coba lagi.';
                                     
-                                    // Form submitted successfully
-                                    // Reset form
-                                    contactForm.reset();
+                                    if (response.ok) {
+                                        // Try to parse JSON response
+                                        if (contentType && contentType.includes("application/json")) {
+                                            const data = await response.json();
+                                            if (data.message) {
+                                                errorMessage = data.message;
+                                            }
+                                        }
+                                        
+                                        // Form submitted successfully
+                                        // Reset form
+                                        contactForm.reset();
+                                        submitBtn.disabled = false;
+                                        submitBtn.innerHTML = '<i class="bi bi-send me-2"></i>Kirim Pesan';
+                                        
+                                        // Show success message
+                                        Swal.fire({
+                                            icon: 'success',
+                                            title: 'Berhasil!',
+                                            text: 'Pesan Anda berhasil dikirim. Terima kasih!',
+                                            confirmButtonColor: '#1E40AF',
+                                            confirmButtonText: 'OK'
+                                        }).then(() => {
+                                            // Show rating modal after success message
+                                            setTimeout(() => {
+                                                const ratingModal = document.getElementById('ratingModalBackdrop');
+                                                if (ratingModal) {
+                                                    ratingModal.classList.add('show');
+                                                }
+                                            }, 500);
+                                        });
+                                    } else {
+                                        // Try to get error message from response
+                                        if (contentType && contentType.includes("application/json")) {
+                                            try {
+                                                const errorData = await response.json();
+                                                if (errorData.message) {
+                                                    errorMessage = errorData.message;
+                                                } else if (errorData.errors) {
+                                                    // Laravel validation errors
+                                                    const errors = Object.values(errorData.errors).flat();
+                                                    errorMessage = errors.join(', ');
+                                                }
+                                            } catch (e) {
+                                                // If JSON parsing fails, use default message
+                                            }
+                                        } else {
+                                            // Try to get text response
+                                            try {
+                                                const text = await response.text();
+                                                if (text) {
+                                                    // Try to extract error from HTML if it's a redirect
+                                                    const parser = new DOMParser();
+                                                    const doc = parser.parseFromString(text, 'text/html');
+                                                    const errorElement = doc.querySelector('.alert-danger, .error');
+                                                    if (errorElement) {
+                                                        errorMessage = errorElement.textContent.trim();
+                                                    }
+                                                }
+                                            } catch (e) {
+                                                // Use default message
+                                            }
+                                        }
+                                        
+                                        throw new Error(errorMessage);
+                                    }
+                                })
+                                .catch(error => {
+                                    // Re-enable submit button
                                     submitBtn.disabled = false;
                                     submitBtn.innerHTML = '<i class="bi bi-send me-2"></i>Kirim Pesan';
                                     
-                                    // Show success message
                                     Swal.fire({
-                                        icon: 'success',
-                                        title: 'Berhasil!',
-                                        text: 'Pesan Anda berhasil dikirim. Terima kasih!',
+                                        icon: 'error',
+                                        title: 'Error!',
+                                        text: error.message || 'Gagal mengirim pesan. Silakan coba lagi.',
                                         confirmButtonColor: '#1E40AF',
                                         confirmButtonText: 'OK'
-                                    }).then(() => {
-                                        // Show rating modal after success message
-                                        setTimeout(() => {
-                                            const ratingModal = document.getElementById('ratingModalBackdrop');
-                                            if (ratingModal) {
-                                                ratingModal.classList.add('show');
-                                            }
-                                        }, 500);
                                     });
-                                } else {
-                                    // Try to get error message from response
-                                    if (contentType && contentType.includes("application/json")) {
-                                        try {
-                                            const errorData = await response.json();
-                                            if (errorData.message) {
-                                                errorMessage = errorData.message;
-                                            } else if (errorData.errors) {
-                                                // Laravel validation errors
-                                                const errors = Object.values(errorData.errors).flat();
-                                                errorMessage = errors.join(', ');
-                                            }
-                                        } catch (e) {
-                                            // If JSON parsing fails, use default message
-                                        }
-                                    } else {
-                                        // Try to get text response
-                                        try {
-                                            const text = await response.text();
-                                            if (text) {
-                                                // Try to extract error from HTML if it's a redirect
-                                                const parser = new DOMParser();
-                                                const doc = parser.parseFromString(text, 'text/html');
-                                                const errorElement = doc.querySelector('.alert-danger, .error');
-                                                if (errorElement) {
-                                                    errorMessage = errorElement.textContent.trim();
-                                                }
-                                            }
-                                        } catch (e) {
-                                            // Use default message
-                                        }
-                                    }
-                                    
-                                    throw new Error(errorMessage);
-                                }
-                            })
-                            .catch(error => {
-                                // Re-enable submit button
-                                submitBtn.disabled = false;
-                                submitBtn.innerHTML = '<i class="bi bi-send me-2"></i>Kirim Pesan';
-                                
-                                Swal.fire({
-                                    icon: 'error',
-                                    title: 'Error!',
-                                    text: error.message || 'Gagal mengirim pesan. Silakan coba lagi.',
-                                    confirmButtonColor: '#1E40AF',
-                                    confirmButtonText: 'OK'
                                 });
+                            }).catch(function(error) {
+                                clearTimeout(recaptchaTimeout);
+                                console.error('reCAPTCHA execute error:', error);
+                                // Fallback: try to submit without token
+                                document.getElementById('g-recaptcha-response').value = 'error';
+                                submitFormDirectly();
                             });
                         }).catch(function(error) {
                             clearTimeout(recaptchaTimeout);
-                            console.error('reCAPTCHA execute error:', error);
-                            // Fallback: try to submit without token
+                            console.error('grecaptcha.ready error:', error);
+                            // Fallback: submit without token
                             document.getElementById('g-recaptcha-response').value = 'error';
                             submitFormDirectly();
                         });
-                    }).catch(function(error) {
-                        clearTimeout(recaptchaTimeout);
-                        console.error('grecaptcha.ready error:', error);
-                        // Fallback: submit without token
-                        document.getElementById('g-recaptcha-response').value = 'error';
-                        submitFormDirectly();
-                    });
                     } catch (error) {
                         clearTimeout(recaptchaTimeout);
                         console.error('grecaptcha.ready catch error:', error);
