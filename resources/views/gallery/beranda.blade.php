@@ -4519,19 +4519,19 @@
                     <div class="card contact-card h-100">
                         <div class="card-body contact-form">
                             <h5 class="mb-3"><i class="bi bi-chat-dots me-2" style="color: #1E40AF;"></i>Kotak Saran</h5>
-                            <form action="{{ route('suggestions.store') }}" method="POST" id="contactForm">
+                            <form action="{{ route('suggestions.store') }}" method="POST" id="contactForm" autocomplete="on">
                                 @csrf
                                 <div class="mb-3">
                                     <label class="form-label">Nama Lengkap</label>
-                                    <input type="text" name="nama_lengkap" class="form-control" placeholder="Masukkan nama lengkap" required>
+                                    <input type="text" name="nama_lengkap" class="form-control" placeholder="Masukkan nama lengkap" autocomplete="name" required>
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label">Email <span class="text-danger">*</span></label>
-                                    <input type="email" name="email" class="form-control" placeholder="contoh@email.com" required>
+                                    <input type="email" name="email" class="form-control" placeholder="contoh@email.com" autocomplete="email" required>
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label">Pesan <span class="text-danger">*</span></label>
-                                    <textarea name="pesan" class="form-control" rows="3" placeholder="Tuliskan pesan atau saran Anda..." required></textarea>
+                                    <textarea name="pesan" class="form-control" rows="3" placeholder="Tuliskan pesan atau saran Anda..." autocomplete="off" required></textarea>
                                 </div>
                                 
                                 <!-- Google reCAPTCHA v3 Token (Hidden) -->
@@ -4699,8 +4699,19 @@
                                     'X-Requested-With': 'XMLHttpRequest'
                                 }
                             })
-                            .then(response => {
+                            .then(async response => {
+                                const contentType = response.headers.get("content-type");
+                                let errorMessage = 'Gagal mengirim pesan. Silakan coba lagi.';
+                                
                                 if (response.ok) {
+                                    // Try to parse JSON response
+                                    if (contentType && contentType.includes("application/json")) {
+                                        const data = await response.json();
+                                        if (data.message) {
+                                            errorMessage = data.message;
+                                        }
+                                    }
+                                    
                                     // Form submitted successfully
                                     // Reset form
                                     contactForm.reset();
@@ -4717,11 +4728,46 @@
                                     }).then(() => {
                                         // Show rating modal after success message
                                         setTimeout(() => {
-                                            document.getElementById('ratingModalBackdrop').classList.add('show');
+                                            const ratingModal = document.getElementById('ratingModalBackdrop');
+                                            if (ratingModal) {
+                                                ratingModal.classList.add('show');
+                                            }
                                         }, 500);
                                     });
                                 } else {
-                                    throw new Error('Form submission failed');
+                                    // Try to get error message from response
+                                    if (contentType && contentType.includes("application/json")) {
+                                        try {
+                                            const errorData = await response.json();
+                                            if (errorData.message) {
+                                                errorMessage = errorData.message;
+                                            } else if (errorData.errors) {
+                                                // Laravel validation errors
+                                                const errors = Object.values(errorData.errors).flat();
+                                                errorMessage = errors.join(', ');
+                                            }
+                                        } catch (e) {
+                                            // If JSON parsing fails, use default message
+                                        }
+                                    } else {
+                                        // Try to get text response
+                                        try {
+                                            const text = await response.text();
+                                            if (text) {
+                                                // Try to extract error from HTML if it's a redirect
+                                                const parser = new DOMParser();
+                                                const doc = parser.parseFromString(text, 'text/html');
+                                                const errorElement = doc.querySelector('.alert-danger, .error');
+                                                if (errorElement) {
+                                                    errorMessage = errorElement.textContent.trim();
+                                                }
+                                            }
+                                        } catch (e) {
+                                            // Use default message
+                                        }
+                                    }
+                                    
+                                    throw new Error(errorMessage);
                                 }
                             })
                             .catch(error => {
@@ -4732,7 +4778,7 @@
                                 Swal.fire({
                                     icon: 'error',
                                     title: 'Error!',
-                                    text: 'Gagal mengirim pesan. Silakan coba lagi.',
+                                    text: error.message || 'Gagal mengirim pesan. Silakan coba lagi.',
                                     confirmButtonColor: '#1E40AF',
                                     confirmButtonText: 'OK'
                                 });

@@ -698,14 +698,14 @@
         </div>
         @endif
 
-        <form action="{{ route('register.process') }}" method="POST" id="registerForm">
+        <form action="{{ route('register.process') }}" method="POST" id="registerForm" autocomplete="on">
             @csrf
             
             <div class="form-group">
                 <label for="name">Full Name</label>
                 <div class="input-group">
                     <i class="fas fa-user"></i>
-                    <input type="text" name="name" id="name" class="form-control" placeholder="Enter your full name" value="{{ old('name') }}" required>
+                    <input type="text" name="name" id="name" class="form-control" placeholder="Enter your full name" value="{{ old('name') }}" autocomplete="name" required>
                 </div>
                 <span class="error-message" id="nameError"></span>
             </div>
@@ -714,7 +714,7 @@
                 <label for="email">Email</label>
                 <div class="input-group">
                     <i class="fas fa-envelope"></i>
-                    <input type="email" name="email" id="email" class="form-control" placeholder="Enter your email" value="{{ old('email') }}" required>
+                    <input type="email" name="email" id="email" class="form-control" placeholder="Enter your email" value="{{ old('email') }}" autocomplete="email" required>
                 </div>
                 <span class="error-message" id="emailError"></span>
             </div>
@@ -723,7 +723,7 @@
                 <label for="password">Password</label>
                 <div class="input-group">
                     <i class="fas fa-lock"></i>
-                    <input type="password" name="password" id="password" class="form-control" placeholder="Enter password (min 6 characters)" required>
+                    <input type="password" name="password" id="password" class="form-control" placeholder="Enter password (min 6 characters)" autocomplete="new-password" required>
                     <button type="button" class="toggle-password" data-target="password" aria-label="Toggle password visibility">
                         <i class="fas fa-eye-slash"></i>
                     </button>
@@ -735,7 +735,7 @@
                 <label for="password_confirmation">Confirm Password</label>
                 <div class="input-group">
                     <i class="fas fa-lock"></i>
-                    <input type="password" name="password_confirmation" id="password_confirmation" class="form-control" placeholder="Re-enter password" required>
+                    <input type="password" name="password_confirmation" id="password_confirmation" class="form-control" placeholder="Re-enter password" autocomplete="new-password" required>
                     <button type="button" class="toggle-password" data-target="password_confirmation" aria-label="Toggle confirm password visibility">
                         <i class="fas fa-eye-slash"></i>
                     </button>

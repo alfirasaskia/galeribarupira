@@ -1481,35 +1481,76 @@ class GalleryController extends Controller
             $foto = DB::table('foto')->where('id', $id)->first();
             
             if (!$foto) {
+                \Log::error('Photo not found for download', ['id' => $id]);
                 abort(404, 'Foto tidak ditemukan');
             }
             
             // Determine file path
             $filePath = null;
             $fileName = $foto->file_name ?? ($foto->judul ?? 'foto') . '.jpg';
+            $filePathValue = $foto->file_path;
             
-            // Try different path variations
-            if ($foto->file_path) {
-                // Try storage path first (new photos)
-                if (file_exists(public_path('storage/' . $foto->file_path))) {
-                    $filePath = public_path('storage/' . $foto->file_path);
-                } 
-                // Try direct public path (old photos)
-                elseif (file_exists(public_path($foto->file_path))) {
-                    $filePath = public_path($foto->file_path);
+            \Log::info('Download photo attempt', [
+                'id' => $id,
+                'file_path' => $filePathValue,
+                'file_name' => $fileName
+            ]);
+            
+            // Check if file_path is a URL (external image)
+            if ($filePathValue && (str_starts_with($filePathValue, 'http://') || str_starts_with($filePathValue, 'https://'))) {
+                // For external URLs, redirect to the URL or fetch and serve
+                \Log::info('External URL detected, redirecting', ['url' => $filePathValue]);
+                return redirect($filePathValue);
+            }
+            
+            // Try different path variations for local files
+            if ($filePathValue) {
+                $possiblePaths = [
+                    // Storage symlink path (most common for new uploads)
+                    public_path('storage/' . ltrim($filePathValue, '/')),
+                    // Direct public path (old uploads)
+                    public_path(ltrim($filePathValue, '/')),
+                    // Storage app public path
+                    storage_path('app/public/' . ltrim($filePathValue, '/')),
+                    // Try with original path as-is
+                    public_path($filePathValue),
+                    // Try storage path without leading slash
+                    public_path('storage' . ltrim($filePathValue, '/')),
+                ];
+                
+                foreach ($possiblePaths as $path) {
+                    if (file_exists($path) && is_file($path)) {
+                        $filePath = $path;
+                        \Log::info('File found at path', ['path' => $path]);
+                        break;
+                    }
                 }
-                // Try without leading slash
-                elseif (file_exists(public_path(ltrim($foto->file_path, '/')))) {
-                    $filePath = public_path(ltrim($foto->file_path, '/'));
-                }
-                // Try storage/app/public path
-                elseif (file_exists(storage_path('app/public/' . $foto->file_path))) {
-                    $filePath = storage_path('app/public/' . $foto->file_path);
+            }
+            
+            // If still not found, try to use Storage facade
+            if (!$filePath && $filePathValue) {
+                try {
+                    if (Storage::disk('public')->exists($filePathValue)) {
+                        $filePath = Storage::disk('public')->path($filePathValue);
+                        \Log::info('File found via Storage facade', ['path' => $filePath]);
+                    }
+                } catch (\Exception $e) {
+                    \Log::warning('Storage facade check failed', ['error' => $e->getMessage()]);
                 }
             }
             
             if (!$filePath || !file_exists($filePath)) {
-                abort(404, 'File foto tidak ditemukan');
+                \Log::error('File not found for download', [
+                    'id' => $id,
+                    'file_path' => $filePathValue,
+                    'tried_paths' => $possiblePaths ?? []
+                ]);
+                
+                // Return a more helpful error
+                return response()->json([
+                    'success' => false,
+                    'message' => 'File foto tidak ditemukan di server. Silakan hubungi administrator.'
+                ], 404);
             }
             
             // Track download activity
@@ -1532,20 +1573,50 @@ class GalleryController extends Controller
                 }
             }
             
+            // Get file extension from actual file or filename
+            $extension = pathinfo($filePath, PATHINFO_EXTENSION) ?: pathinfo($fileName, PATHINFO_EXTENSION) ?: 'jpg';
+            
             // Clean filename for download
-            $downloadFileName = preg_replace('/[^a-z0-9._-]/i', '_', $fileName);
-            if (!pathinfo($downloadFileName, PATHINFO_EXTENSION)) {
-                $downloadFileName .= '.jpg';
-            }
+            $baseFileName = pathinfo($fileName, PATHINFO_FILENAME) ?: ($foto->judul ?? 'foto');
+            $downloadFileName = preg_replace('/[^a-z0-9._-]/i', '_', $baseFileName) . '.' . $extension;
+            
+            // Determine content type based on extension
+            $contentTypes = [
+                'jpg' => 'image/jpeg',
+                'jpeg' => 'image/jpeg',
+                'png' => 'image/png',
+                'gif' => 'image/gif',
+                'webp' => 'image/webp'
+            ];
+            $contentType = $contentTypes[strtolower($extension)] ?? 'image/jpeg';
+            
+            \Log::info('Serving download', [
+                'file_path' => $filePath,
+                'download_name' => $downloadFileName,
+                'content_type' => $contentType
+            ]);
             
             // Return file with download headers
             return Response::download($filePath, $downloadFileName, [
-                'Content-Type' => 'image/jpeg',
+                'Content-Type' => $contentType,
                 'Content-Disposition' => 'attachment; filename="' . $downloadFileName . '"',
             ]);
             
         } catch (\Exception $e) {
-            \Log::error('Download photo error: ' . $e->getMessage());
+            \Log::error('Download photo error', [
+                'id' => $id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            // Return JSON error for AJAX requests
+            if (request()->ajax() || request()->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Gagal mengunduh foto: ' . $e->getMessage()
+                ], 500);
+            }
+            
             abort(500, 'Gagal mengunduh foto: ' . $e->getMessage());
         }
     }

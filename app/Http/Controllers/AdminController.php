@@ -956,39 +956,134 @@ class AdminController extends Controller
     
     public function suggestionsStore(Request $request)
     {
+        // Check if this is an AJAX request
+        $isAjax = $request->ajax() || $request->wantsJson() || $request->header('X-Requested-With') === 'XMLHttpRequest';
+        
         // Log untuk debugging
         \Log::info('Form submission received', [
             'nama_lengkap' => $request->nama_lengkap,
             'email' => $request->email,
-            'has_recaptcha' => $request->has('g-recaptcha-response')
+            'has_recaptcha' => $request->has('g-recaptcha-response'),
+            'is_ajax' => $isAjax
         ]);
         
-        $request->validate([
-            'nama_lengkap' => 'required|string|max:255',
-            'email' => 'required|email',
-            'pesan' => 'required|string',
-            'g-recaptcha-response' => 'required'
-        ], [
-            'g-recaptcha-response.required' => 'Verifikasi reCAPTCHA diperlukan.'
-        ]);
+        try {
+            $request->validate([
+                'nama_lengkap' => 'required|string|max:255',
+                'email' => 'required|email',
+                'pesan' => 'required|string',
+                'g-recaptcha-response' => 'required'
+            ], [
+                'g-recaptcha-response.required' => 'Verifikasi reCAPTCHA diperlukan.',
+                'nama_lengkap.required' => 'Nama lengkap wajib diisi.',
+                'email.required' => 'Email wajib diisi.',
+                'email.email' => 'Format email tidak valid.',
+                'pesan.required' => 'Pesan wajib diisi.'
+            ]);
 
-        // Verifikasi Google reCAPTCHA v3
-        $recaptchaResponse = $request->input('g-recaptcha-response');
-        $secretKey = env('RECAPTCHA_SECRET_KEY');
-        $isLocal = app()->environment('local')
-            || in_array($request->ip(), ['127.0.0.1', '::1'])
-            || str_contains($request->getHost(), '127.0.0.1')
-            || str_contains($request->getHost(), 'localhost');
-        
-        // Log secret key status (jangan log key asli untuk keamanan)
-        \Log::info('reCAPTCHA verification', [
-            'has_secret_key' => !empty($secretKey),
-            'token_length' => strlen($recaptchaResponse)
-        ]);
-        
-        // Jika tidak ada secret key ATAU sedang di lingkungan lokal, skip verifikasi (untuk pengembangan lokal)
-        if (empty($secretKey) || $isLocal) {
-            \Log::warning('RECAPTCHA_SECRET_KEY not set in .env, skipping verification');
+            // Verifikasi Google reCAPTCHA v3
+            $recaptchaResponse = $request->input('g-recaptcha-response');
+            $secretKey = env('RECAPTCHA_SECRET_KEY');
+            $isLocal = app()->environment('local')
+                || in_array($request->ip(), ['127.0.0.1', '::1'])
+                || str_contains($request->getHost(), '127.0.0.1')
+                || str_contains($request->getHost(), 'localhost');
+            
+            // Log secret key status (jangan log key asli untuk keamanan)
+            \Log::info('reCAPTCHA verification', [
+                'has_secret_key' => !empty($secretKey),
+                'token_length' => strlen($recaptchaResponse)
+            ]);
+            
+            // Jika tidak ada secret key ATAU sedang di lingkungan lokal, skip verifikasi (untuk pengembangan lokal)
+            if (empty($secretKey) || $isLocal) {
+                \Log::warning('RECAPTCHA_SECRET_KEY not set in .env, skipping verification');
+                
+                DB::table('suggestions')->insert([
+                    'nama_lengkap' => $request->nama_lengkap,
+                    'email' => $request->email,
+                    'pesan' => $request->pesan,
+                    'status' => 'pending',
+                    'created_at' => now(),
+                    'updated_at' => now()
+                ]);
+                
+                if ($isAjax) {
+                    return response()->json([
+                        'success' => true,
+                        'message' => 'Terima kasih! Pesan Anda berhasil dikirim dan akan ditampilkan di testimoni setelah disetujui admin.'
+                    ]);
+                }
+                
+                return redirect()->route('gallery.beranda')->with('success', 'Terima kasih! Pesan Anda berhasil dikirim dan akan ditampilkan di testimoni setelah disetujui admin.');
+            }
+            
+            $verifyResponse = \Illuminate\Support\Facades\Http::asForm()->post('https://www.google.com/recaptcha/api/siteverify', [
+                'secret' => $secretKey,
+                'response' => $recaptchaResponse,
+                'remoteip' => $request->ip()
+            ]);
+
+            $recaptchaResult = $verifyResponse->json();
+            
+            // Log hasil verifikasi
+            \Log::info('reCAPTCHA result', [
+                'success' => $recaptchaResult['success'] ?? false,
+                'score' => $recaptchaResult['score'] ?? 0,
+                'error_codes' => $recaptchaResult['error-codes'] ?? []
+            ]);
+            
+            // reCAPTCHA v3 validation with score threshold
+            if (!isset($recaptchaResult['success']) || !$recaptchaResult['success']) {
+                \Log::error('reCAPTCHA verification failed', $recaptchaResult);
+                // Jika verifikasi gagal tetapi lingkungan lokal, tetap izinkan untuk keperluan pengembangan
+                if ($isLocal) {
+                    DB::table('suggestions')->insert([
+                        'nama_lengkap' => $request->nama_lengkap,
+                        'email' => $request->email,
+                        'pesan' => $request->pesan,
+                        'status' => 'pending',
+                        'created_at' => now(),
+                        'updated_at' => now()
+                    ]);
+                    
+                    if ($isAjax) {
+                        return response()->json([
+                            'success' => true,
+                            'message' => 'Terima kasih! Pesan Anda berhasil dikirim dan akan ditampilkan di testimoni setelah disetujui admin.'
+                        ]);
+                    }
+                    
+                    return redirect()->route('gallery.beranda')->with('success', 'Terima kasih! Pesan Anda berhasil dikirim dan akan ditampilkan di testimoni setelah disetujui admin.');
+                }
+                
+                $errorMessage = 'Verifikasi reCAPTCHA gagal, coba lagi.';
+                if ($isAjax) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => $errorMessage
+                    ], 422);
+                }
+                
+                return back()->withErrors(['recaptcha' => $errorMessage])->withInput();
+            }
+            
+            // Check score (v3 returns score 0.0 - 1.0, higher is more likely human)
+            // Threshold 0.3 untuk localhost (lebih rendah dari 0.5 untuk testing)
+            $score = $recaptchaResult['score'] ?? 0;
+            if ($score < 0.3 && !$isLocal) {
+                \Log::warning('reCAPTCHA score too low', ['score' => $score]);
+                $errorMessage = 'Verifikasi keamanan gagal. Silakan coba lagi.';
+                
+                if ($isAjax) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => $errorMessage
+                    ], 422);
+                }
+                
+                return back()->withErrors(['recaptcha' => $errorMessage])->withInput();
+            }
             
             DB::table('suggestions')->insert([
                 'nama_lengkap' => $request->nama_lengkap,
@@ -999,62 +1094,42 @@ class AdminController extends Controller
                 'updated_at' => now()
             ]);
             
-            return redirect()->route('gallery.beranda')->with('success', 'Terima kasih! Pesan Anda berhasil dikirim dan akan ditampilkan di testimoni setelah disetujui admin.');
-        }
-        
-        $verifyResponse = \Illuminate\Support\Facades\Http::asForm()->post('https://www.google.com/recaptcha/api/siteverify', [
-            'secret' => $secretKey,
-            'response' => $recaptchaResponse,
-            'remoteip' => $request->ip()
-        ]);
-
-        $recaptchaResult = $verifyResponse->json();
-        
-        // Log hasil verifikasi
-        \Log::info('reCAPTCHA result', [
-            'success' => $recaptchaResult['success'] ?? false,
-            'score' => $recaptchaResult['score'] ?? 0,
-            'error_codes' => $recaptchaResult['error-codes'] ?? []
-        ]);
-        
-        // reCAPTCHA v3 validation with score threshold
-        if (!isset($recaptchaResult['success']) || !$recaptchaResult['success']) {
-            \Log::error('reCAPTCHA verification failed', $recaptchaResult);
-            // Jika verifikasi gagal tetapi lingkungan lokal, tetap izinkan untuk keperluan pengembangan
-            if ($isLocal) {
-                DB::table('suggestions')->insert([
-                    'nama_lengkap' => $request->nama_lengkap,
-                    'email' => $request->email,
-                    'pesan' => $request->pesan,
-                    'status' => 'pending',
-                    'created_at' => now(),
-                    'updated_at' => now()
+            \Log::info('Suggestion saved successfully');
+            
+            $successMessage = 'Terima kasih! Pesan Anda berhasil dikirim dan akan ditampilkan di testimoni setelah disetujui admin.';
+            
+            if ($isAjax) {
+                return response()->json([
+                    'success' => true,
+                    'message' => $successMessage
                 ]);
-                return redirect()->route('gallery.beranda')->with('success', 'Terima kasih! Pesan Anda berhasil dikirim dan akan ditampilkan di testimoni setelah disetujui admin.');
             }
-            return back()->withErrors(['recaptcha' => 'Verifikasi reCAPTCHA gagal, coba lagi.'])->withInput();
+            
+            return redirect()->route('gallery.beranda')->with('success', $successMessage);
+            
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            if ($isAjax) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Validasi gagal',
+                    'errors' => $e->errors()
+                ], 422);
+            }
+            throw $e;
+        } catch (\Exception $e) {
+            \Log::error('Suggestion store error: ' . $e->getMessage());
+            
+            $errorMessage = 'Terjadi kesalahan saat mengirim pesan. Silakan coba lagi.';
+            
+            if ($isAjax) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $errorMessage
+                ], 500);
+            }
+            
+            return back()->withErrors(['error' => $errorMessage])->withInput();
         }
-        
-        // Check score (v3 returns score 0.0 - 1.0, higher is more likely human)
-        // Threshold 0.3 untuk localhost (lebih rendah dari 0.5 untuk testing)
-        $score = $recaptchaResult['score'] ?? 0;
-        if ($score < 0.3 && !$isLocal) {
-            \Log::warning('reCAPTCHA score too low', ['score' => $score]);
-            return back()->withErrors(['recaptcha' => 'Verifikasi keamanan gagal. Score: ' . $score . '. Silakan coba lagi.'])->withInput();
-        }
-        
-        DB::table('suggestions')->insert([
-            'nama_lengkap' => $request->nama_lengkap,
-            'email' => $request->email,
-            'pesan' => $request->pesan,
-            'status' => 'pending',
-            'created_at' => now(),
-            'updated_at' => now()
-        ]);
-        
-        \Log::info('Suggestion saved successfully');
-        
-        return redirect()->route('gallery.beranda')->with('success', 'Terima kasih! Pesan Anda berhasil dikirim dan akan ditampilkan di testimoni setelah disetujui admin.');
     }
     
     public function suggestionsDestroy($id)
