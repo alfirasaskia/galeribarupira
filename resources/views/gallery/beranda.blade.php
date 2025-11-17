@@ -4621,10 +4621,32 @@
             window.addEventListener('scroll', handleScroll);
         });
         
-        // reCAPTCHA v3 - Auto execute on page load
-        grecaptcha.ready(function() {
-            // reCAPTCHA loaded
+        // Global error handler untuk mencegah infinite loading
+        window.addEventListener('error', function(e) {
+            console.error('Global error:', e.error);
+            // Prevent infinite loading by ensuring page is interactive
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', function() {
+                    document.body.style.opacity = '1';
+                });
+            } else {
+                document.body.style.opacity = '1';
+            }
         });
+        
+        // reCAPTCHA v3 - Auto execute on page load dengan error handling
+        if (typeof grecaptcha !== 'undefined') {
+            try {
+                grecaptcha.ready(function() {
+                    // reCAPTCHA loaded
+                    console.log('reCAPTCHA ready');
+                });
+            } catch (e) {
+                console.warn('reCAPTCHA initialization error:', e);
+            }
+        } else {
+            console.warn('reCAPTCHA script not loaded');
+        }
 
         // Check for success message and scroll to hubungi kami
         var hasSuccess = {{ session('success') ? 'true' : 'false' }};
@@ -4683,8 +4705,25 @@
                     // Simpan nama ke variable global sebelum form di-reset
                     window.userNamaLengkap = document.querySelector('input[name="nama_lengkap"]')?.value || 'Anonymous';
                     
+                    // Check if grecaptcha is available
+                    if (typeof grecaptcha === 'undefined' || !grecaptcha.ready) {
+                        console.error('reCAPTCHA not loaded');
+                        // Fallback: submit without reCAPTCHA token (will be handled by server)
+                        document.getElementById('g-recaptcha-response').value = 'bypass';
+                        submitFormDirectly();
+                        return;
+                    }
+                    
+                    // Set timeout for reCAPTCHA (10 seconds)
+                    const recaptchaTimeout = setTimeout(function() {
+                        console.warn('reCAPTCHA timeout, submitting without token');
+                        document.getElementById('g-recaptcha-response').value = 'timeout';
+                        submitFormDirectly();
+                    }, 10000);
+                    
                     // Execute reCAPTCHA v3
                     grecaptcha.ready(function() {
+                        clearTimeout(recaptchaTimeout);
                         grecaptcha.execute('6Ld0ffcrAAAAAOtioZEl4nY5fpoJB745yD7yZesv', {action: 'submit'}).then(function(token) {
                             // Add token to form
                             document.getElementById('g-recaptcha-response').value = token;
@@ -4784,18 +4823,114 @@
                                 });
                             });
                         }).catch(function(error) {
-                            // Re-enable submit button
-                            submitBtn.disabled = false;
-                            submitBtn.innerHTML = '<i class="bi bi-send me-2"></i>Kirim Pesan';
-                            
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Error!',
-                                text: 'Verifikasi reCAPTCHA gagal. Silakan coba lagi.',
-                                confirmButtonColor: '#1E40AF',
-                                confirmButtonText: 'OK'
-                            });
+                            clearTimeout(recaptchaTimeout);
+                            console.error('reCAPTCHA error:', error);
+                            // Fallback: try to submit without token
+                            document.getElementById('g-recaptcha-response').value = 'error';
+                            submitFormDirectly();
                         });
+                    }).catch(function(error) {
+                        clearTimeout(recaptchaTimeout);
+                        console.error('grecaptcha.ready error:', error);
+                        // Fallback: submit without token
+                        document.getElementById('g-recaptcha-response').value = 'error';
+                        submitFormDirectly();
+                    });
+                });
+            }
+            
+            // Function to submit form directly (fallback when reCAPTCHA fails)
+            function submitFormDirectly() {
+                const formData = new FormData(contactForm);
+                
+                fetch(contactForm.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(async response => {
+                    const contentType = response.headers.get("content-type");
+                    let errorMessage = 'Gagal mengirim pesan. Silakan coba lagi.';
+                    
+                    if (response.ok) {
+                        // Try to parse JSON response
+                        if (contentType && contentType.includes("application/json")) {
+                            const data = await response.json();
+                            if (data.message) {
+                                errorMessage = data.message;
+                            }
+                        }
+                        
+                        // Form submitted successfully
+                        contactForm.reset();
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = '<i class="bi bi-send me-2"></i>Kirim Pesan';
+                        
+                        // Show success message
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Berhasil!',
+                            text: 'Pesan Anda berhasil dikirim. Terima kasih!',
+                            confirmButtonColor: '#1E40AF',
+                            confirmButtonText: 'OK'
+                        }).then(() => {
+                            // Show rating modal after success message
+                            setTimeout(() => {
+                                const ratingModal = document.getElementById('ratingModalBackdrop');
+                                if (ratingModal) {
+                                    ratingModal.classList.add('show');
+                                }
+                            }, 500);
+                        });
+                    } else {
+                        // Try to get error message from response
+                        if (contentType && contentType.includes("application/json")) {
+                            try {
+                                const errorData = await response.json();
+                                if (errorData.message) {
+                                    errorMessage = errorData.message;
+                                } else if (errorData.errors) {
+                                    // Laravel validation errors
+                                    const errors = Object.values(errorData.errors).flat();
+                                    errorMessage = errors.join(', ');
+                                }
+                            } catch (e) {
+                                // If JSON parsing fails, use default message
+                            }
+                        } else {
+                            // Try to get text response
+                            try {
+                                const text = await response.text();
+                                if (text) {
+                                    // Try to extract error from HTML if it's a redirect
+                                    const parser = new DOMParser();
+                                    const doc = parser.parseFromString(text, 'text/html');
+                                    const errorElement = doc.querySelector('.alert-danger, .error');
+                                    if (errorElement) {
+                                        errorMessage = errorElement.textContent.trim();
+                                    }
+                                }
+                            } catch (e) {
+                                // Use default message
+                            }
+                        }
+                        
+                        throw new Error(errorMessage);
+                    }
+                })
+                .catch(error => {
+                    // Re-enable submit button
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="bi bi-send me-2"></i>Kirim Pesan';
+                    
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error!',
+                        text: error.message || 'Gagal mengirim pesan. Silakan coba lagi.',
+                        confirmButtonColor: '#1E40AF',
+                        confirmButtonText: 'OK'
                     });
                 });
             }

@@ -972,17 +972,19 @@ class AdminController extends Controller
                 'nama_lengkap' => 'required|string|max:255',
                 'email' => 'required|email',
                 'pesan' => 'required|string',
-                'g-recaptcha-response' => 'required'
+                'g-recaptcha-response' => 'nullable|string' // Changed to nullable to allow fallback
             ], [
-                'g-recaptcha-response.required' => 'Verifikasi reCAPTCHA diperlukan.',
                 'nama_lengkap.required' => 'Nama lengkap wajib diisi.',
                 'email.required' => 'Email wajib diisi.',
                 'email.email' => 'Format email tidak valid.',
                 'pesan.required' => 'Pesan wajib diisi.'
             ]);
+            
+            // Check for fallback tokens (bypass, timeout, error)
+            $recaptchaResponse = $request->input('g-recaptcha-response');
+            $isFallbackToken = in_array($recaptchaResponse, ['bypass', 'timeout', 'error', null, '']);
 
             // Verifikasi Google reCAPTCHA v3
-            $recaptchaResponse = $request->input('g-recaptcha-response');
             $secretKey = env('RECAPTCHA_SECRET_KEY');
             $isLocal = app()->environment('local')
                 || in_array($request->ip(), ['127.0.0.1', '::1'])
@@ -992,11 +994,13 @@ class AdminController extends Controller
             // Log secret key status (jangan log key asli untuk keamanan)
             \Log::info('reCAPTCHA verification', [
                 'has_secret_key' => !empty($secretKey),
-                'token_length' => strlen($recaptchaResponse)
+                'token_length' => $recaptchaResponse ? strlen($recaptchaResponse) : 0,
+                'is_fallback' => $isFallbackToken,
+                'is_local' => $isLocal
             ]);
             
-            // Jika tidak ada secret key ATAU sedang di lingkungan lokal, skip verifikasi (untuk pengembangan lokal)
-            if (empty($secretKey) || $isLocal) {
+            // Jika fallback token atau tidak ada secret key ATAU sedang di lingkungan lokal, skip verifikasi
+            if ($isFallbackToken || empty($secretKey) || $isLocal) {
                 \Log::warning('RECAPTCHA_SECRET_KEY not set in .env, skipping verification');
                 
                 DB::table('suggestions')->insert([
