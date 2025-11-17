@@ -4519,7 +4519,7 @@
                     <div class="card contact-card h-100">
                         <div class="card-body contact-form">
                             <h5 class="mb-3"><i class="bi bi-chat-dots me-2" style="color: #1E40AF;"></i>Kotak Saran</h5>
-                            <form action="{{ route('suggestions.store') }}" method="POST" id="contactForm" autocomplete="on">
+                            <form action="{{ url('/suggestions') }}" method="POST" id="contactForm" autocomplete="on">
                                 @csrf
                                 <div class="mb-3">
                                     <label class="form-label">Nama Lengkap</label>
