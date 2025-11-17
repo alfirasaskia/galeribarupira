@@ -4705,9 +4705,9 @@
                     // Simpan nama ke variable global sebelum form di-reset
                     window.userNamaLengkap = document.querySelector('input[name="nama_lengkap"]')?.value || 'Anonymous';
                     
-                    // Check if grecaptcha is available
-                    if (typeof grecaptcha === 'undefined' || !grecaptcha.ready) {
-                        console.error('reCAPTCHA not loaded');
+                    // Check if grecaptcha is available and ready
+                    if (typeof grecaptcha === 'undefined' || typeof grecaptcha.ready === 'undefined' || typeof grecaptcha.execute === 'undefined') {
+                        console.error('reCAPTCHA not loaded or not ready');
                         // Fallback: submit without reCAPTCHA token (will be handled by server)
                         document.getElementById('g-recaptcha-response').value = 'bypass';
                         submitFormDirectly();
@@ -4715,28 +4715,44 @@
                     }
                     
                     // Set timeout for reCAPTCHA (10 seconds)
-                    const recaptchaTimeout = setTimeout(function() {
+                    let recaptchaTimeout = setTimeout(function() {
                         console.warn('reCAPTCHA timeout, submitting without token');
                         document.getElementById('g-recaptcha-response').value = 'timeout';
                         submitFormDirectly();
                     }, 10000);
                     
-                    // Execute reCAPTCHA v3
-                    grecaptcha.ready(function() {
-                        clearTimeout(recaptchaTimeout);
-                        grecaptcha.execute('6Ld0ffcrAAAAAOtioZEl4nY5fpoJB745yD7yZesv', {action: 'submit'}).then(function(token) {
+                    // Execute reCAPTCHA v3 with proper error handling
+                    try {
+                        grecaptcha.ready(function() {
+                            clearTimeout(recaptchaTimeout);
+                            
+                            // Double check grecaptcha.execute is available
+                            if (typeof grecaptcha.execute === 'undefined') {
+                                console.error('grecaptcha.execute is not available');
+                                document.getElementById('g-recaptcha-response').value = 'error';
+                                submitFormDirectly();
+                                return;
+                            }
+                            
+                            grecaptcha.execute('6Ld0ffcrAAAAAOtioZEl4nY5fpoJB745yD7yZesv', {action: 'submit'}).then(function(token) {
                             // Add token to form
                             document.getElementById('g-recaptcha-response').value = token;
                             
                             // Submit form via AJAX
                             const formData = new FormData(contactForm);
                             
-                            fetch(contactForm.action, {
+                            // Use absolute URL to avoid CORS issues
+                            const formAction = contactForm.action;
+                            const url = formAction.startsWith('http') ? formAction : window.location.origin + formAction;
+                            
+                            fetch(url, {
                                 method: 'POST',
                                 body: formData,
                                 headers: {
-                                    'X-Requested-With': 'XMLHttpRequest'
-                                }
+                                    'X-Requested-With': 'XMLHttpRequest',
+                                    'Accept': 'application/json'
+                                },
+                                credentials: 'same-origin'
                             })
                             .then(async response => {
                                 const contentType = response.headers.get("content-type");
@@ -4824,7 +4840,7 @@
                             });
                         }).catch(function(error) {
                             clearTimeout(recaptchaTimeout);
-                            console.error('reCAPTCHA error:', error);
+                            console.error('reCAPTCHA execute error:', error);
                             // Fallback: try to submit without token
                             document.getElementById('g-recaptcha-response').value = 'error';
                             submitFormDirectly();
@@ -4836,6 +4852,13 @@
                         document.getElementById('g-recaptcha-response').value = 'error';
                         submitFormDirectly();
                     });
+                    } catch (error) {
+                        clearTimeout(recaptchaTimeout);
+                        console.error('grecaptcha.ready catch error:', error);
+                        // Fallback: submit without token
+                        document.getElementById('g-recaptcha-response').value = 'error';
+                        submitFormDirectly();
+                    }
                 });
             }
             
@@ -4843,12 +4866,18 @@
             function submitFormDirectly() {
                 const formData = new FormData(contactForm);
                 
-                fetch(contactForm.action, {
+                // Use absolute URL to avoid CORS issues
+                const formAction = contactForm.action;
+                const url = formAction.startsWith('http') ? formAction : window.location.origin + formAction;
+                
+                fetch(url, {
                     method: 'POST',
                     body: formData,
                     headers: {
-                        'X-Requested-With': 'XMLHttpRequest'
-                    }
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json'
+                    },
+                    credentials: 'same-origin'
                 })
                 .then(async response => {
                     const contentType = response.headers.get("content-type");
