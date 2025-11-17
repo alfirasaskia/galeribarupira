@@ -186,12 +186,13 @@ class AuthController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|email',
+            'email' => 'required|email|unique:users,email',
             'password' => 'required|min:6|confirmed'
         ], [
             'name.required' => 'Nama lengkap harus diisi',
             'email.required' => 'Email harus diisi',
             'email.email' => 'Format email tidak valid',
+            'email.unique' => 'Email sudah terdaftar. Silakan gunakan email lain atau login jika sudah memiliki akun.',
             'password.required' => 'Password harus diisi',
             'password.min' => 'Password minimal 6 karakter',
             'password.confirmed' => 'Konfirmasi password tidak cocok'
@@ -201,7 +202,7 @@ class AuthController extends Controller
             // Cek apakah email sudah terdaftar dan TERVERIFIKASI
             $existingUser = DB::table('users')->where('email', $request->email)->whereNotNull('email_verified_at')->first();
             if ($existingUser) {
-                return back()->withErrors(['email' => 'Email sudah terdaftar'])->withInput();
+                return back()->withErrors(['email' => 'Email sudah terdaftar. Silakan login jika Anda sudah memiliki akun.'])->withInput();
             }
             
             // Jika email ada tapi belum terverifikasi, hapus user lama dan OTP-nya
@@ -266,8 +267,30 @@ class AuthController extends Controller
             // Redirect ke halaman verifikasi OTP
             return redirect()->route('verify.otp')->with('success', 'Registrasi berhasil! Kode OTP telah dikirim ke email Anda. Silakan cek email dan masukkan kode verifikasi.');
             
+        } catch (\Illuminate\Database\QueryException $e) {
+            // Handle database errors (duplicate entry, etc)
+            if ($e->getCode() == 23000) {
+                // Duplicate entry error
+                return back()->withErrors(['email' => 'Email sudah terdaftar. Silakan gunakan email lain atau login jika sudah memiliki akun.'])->withInput();
+            }
+            
+            // Log error untuk debugging
+            \Log::error('Registration error', [
+                'email' => $request->email,
+                'error' => $e->getMessage(),
+                'code' => $e->getCode()
+            ]);
+            
+            return back()->withErrors(['error' => 'Terjadi kesalahan saat mendaftar. Silakan coba lagi.'])->withInput();
         } catch (\Exception $e) {
-            return back()->withErrors(['error' => 'Terjadi kesalahan saat mendaftar. Silakan coba lagi. Error: ' . $e->getMessage()])->withInput();
+            // Log error untuk debugging
+            \Log::error('Registration error', [
+                'email' => $request->email,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            return back()->withErrors(['error' => 'Terjadi kesalahan saat mendaftar. Silakan coba lagi.'])->withInput();
         }
     }
 }
