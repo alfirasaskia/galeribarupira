@@ -113,8 +113,8 @@ class OtpController extends Controller
             return back()->withErrors(['error' => 'User tidak ditemukan.']);
         }
 
-        // Tandai semua OTP lama sebagai sudah digunakan
-        Otp::where('user_id', $userId)->update(['used' => true]);
+        // Hapus semua OTP lama (bukan hanya tandai sebagai used)
+        Otp::where('user_id', $userId)->delete();
 
         // Generate OTP baru
         $otpCode = Otp::generateCode();

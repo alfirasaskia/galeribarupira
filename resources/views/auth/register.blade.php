@@ -23,6 +23,7 @@
             padding: 30px 20px;
             overflow: hidden;
             position: relative;
+            pointer-events: auto !important;
         }
 
         /* Decorative wave shapes on body background */
@@ -72,6 +73,7 @@
             height: 100%;
             overflow: hidden;
             z-index: 0;
+            pointer-events: none !important;
         }
 
         .particle {
@@ -104,19 +106,10 @@
             width: 100%;
             max-width: 480px;
             padding: 40px 50px 45px 50px;
-            animation: fadeInUp 0.8s ease-out forwards;
-            opacity: 0;
-        }
-
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px) scale(0.95);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0) scale(1);
-            }
+            pointer-events: auto !important;
+            opacity: 1 !important;
+            visibility: visible !important;
+            display: block !important;
         }
 
         .logo-container {
@@ -169,6 +162,7 @@
 
         .form-group {
             margin-bottom: 14px;
+            pointer-events: auto !important;
         }
 
         .form-group label {
@@ -181,6 +175,8 @@
 
         .input-group {
             position: relative;
+            pointer-events: auto !important;
+            overflow: visible !important;
         }
 
         .input-group i {
@@ -191,32 +187,48 @@
             color: #666;
             font-size: 16px;
             z-index: 1;
+            pointer-events: none !important;
         }
 
         .toggle-password {
             position: absolute;
-            right: 45px;
+            right: 15px;
             top: 50%;
             transform: translateY(-50%);
             background: transparent;
             border: none;
-            padding: 0;
+            padding: 10px;
             margin: 0;
-            cursor: pointer;
+            cursor: pointer !important;
             color: #666;
             font-size: 16px;
-            z-index: 2;
-            width: auto;
-            height: auto;
+            z-index: 999 !important;
+            width: 40px;
+            height: 40px;
+            pointer-events: auto !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            visibility: visible !important;
+        }
+
+        .toggle-password:hover {
+            color: #333;
+            pointer-events: auto !important;
+        }
+
+        .toggle-password:active {
+            pointer-events: auto !important;
         }
 
         .toggle-password:focus {
             outline: none;
+            pointer-events: auto !important;
         }
 
         #password,
         #password_confirmation {
-            padding-right: 65px;
+            padding-right: 50px !important;
         }
 
         .form-control {
@@ -229,6 +241,7 @@
             outline: none;
             background: #f8f9fa;
             min-height: 50px;
+            pointer-events: auto !important;
         }
 
         .form-control:focus {
@@ -259,9 +272,14 @@
             font-weight: 600;
             letter-spacing: 0.5px;
             text-transform: uppercase;
-            cursor: pointer;
+            cursor: pointer !important;
             transition: all 0.3s;
             margin-top: 20px;
+            position: relative;
+            z-index: 10;
+            pointer-events: auto !important;
+            display: block !important;
+            visibility: visible !important;
         }
 
         .btn-register:hover {
@@ -271,6 +289,11 @@
 
         .btn-register:active {
             transform: translateY(0);
+        }
+        
+        .btn-register:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
         }
 
         .divider {
@@ -755,82 +778,137 @@
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
+        // Debug: Log ketika page loaded
+        console.log('Register page loaded');
+        
         // Form validation
-        document.getElementById('registerForm').addEventListener('submit', function(e) {
-            let isValid = true;
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM Content Loaded');
+            const form = document.getElementById('registerForm');
+            const submitBtn = document.querySelector('.btn-register');
             
-            // Clear previous errors
-            document.querySelectorAll('.error-message').forEach(el => el.classList.remove('show'));
+            console.log('Form element:', form);
+            console.log('Submit button:', submitBtn);
             
-            // Validate name
-            const name = document.getElementById('name').value.trim();
-            if (name.length < 3) {
-                document.getElementById('nameError').textContent = 'Nama minimal 3 karakter';
-                document.getElementById('nameError').classList.add('show');
-                isValid = false;
+            if (!form) {
+                console.error('Form tidak ditemukan!');
+                return;
             }
             
-            // Validate email
-            const email = document.getElementById('email').value.trim();
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (!emailRegex.test(email)) {
-                document.getElementById('emailError').textContent = 'Format email tidak valid';
-                document.getElementById('emailError').classList.add('show');
-                isValid = false;
-            }
-            
-            // Validate password
-            const password = document.getElementById('password').value;
-            if (password.length < 6) {
-                document.getElementById('passwordError').textContent = 'Password minimal 6 karakter';
-                document.getElementById('passwordError').classList.add('show');
-                isValid = false;
-            }
-            
-            // Validate password confirmation
-            const passwordConfirm = document.getElementById('password_confirmation').value;
-            if (password !== passwordConfirm) {
-                document.getElementById('confirmError').textContent = 'Konfirmasi password tidak cocok';
-                document.getElementById('confirmError').classList.add('show');
-                isValid = false;
-            }
-            
-            if (!isValid) {
-                e.preventDefault();
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Validasi Gagal',
-                    text: 'Mohon periksa kembali form registrasi Anda',
-                    confirmButtonColor: '#667eea'
+            // Test button click
+            if (submitBtn) {
+                submitBtn.addEventListener('click', function(e) {
+                    console.log('Button clicked!', e);
                 });
             }
+            
+            form.addEventListener('submit', function(e) {
+                console.log('Form submit event triggered');
+                let isValid = true;
+                
+                // Clear previous errors
+                document.querySelectorAll('.error-message').forEach(el => el.classList.remove('show'));
+                
+                // Validate name
+                const name = document.getElementById('name').value.trim();
+                if (name.length < 3) {
+                    document.getElementById('nameError').textContent = 'Nama minimal 3 karakter';
+                    document.getElementById('nameError').classList.add('show');
+                    isValid = false;
+                }
+                
+                // Validate email
+                const email = document.getElementById('email').value.trim();
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailRegex.test(email)) {
+                    document.getElementById('emailError').textContent = 'Format email tidak valid';
+                    document.getElementById('emailError').classList.add('show');
+                    isValid = false;
+                }
+                
+                // Validate password
+                const password = document.getElementById('password').value;
+                if (password.length < 6) {
+                    document.getElementById('passwordError').textContent = 'Password minimal 6 karakter';
+                    document.getElementById('passwordError').classList.add('show');
+                    isValid = false;
+                }
+                
+                // Validate password confirmation
+                const passwordConfirm = document.getElementById('password_confirmation').value;
+                if (password !== passwordConfirm) {
+                    document.getElementById('confirmError').textContent = 'Konfirmasi password tidak cocok';
+                    document.getElementById('confirmError').classList.add('show');
+                    isValid = false;
+                }
+                
+                if (!isValid) {
+                    e.preventDefault();
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Validasi Gagal',
+                        text: 'Mohon periksa kembali form registrasi Anda',
+                        confirmButtonColor: '#667eea'
+                    });
+                }
+            });
         });
 
         // Toggle show/hide password fields
         document.addEventListener('DOMContentLoaded', function () {
             const toggleButtons = document.querySelectorAll('.toggle-password');
+            console.log('Found toggle buttons:', toggleButtons.length);
+            
             toggleButtons.forEach(function (btn) {
-                btn.addEventListener('click', function () {
-                    const targetId = this.getAttribute('data-target');
-                    const input = document.getElementById(targetId);
-                    if (!input) return;
-
-                    const icon = this.querySelector('i');
-                    if (input.type === 'password') {
-                        input.type = 'text';
-                        if (icon) {
-                            icon.classList.remove('fa-eye-slash');
-                            icon.classList.add('fa-eye');
-                        }
-                    } else {
-                        input.type = 'password';
-                        if (icon) {
-                            icon.classList.remove('fa-eye');
-                            icon.classList.add('fa-eye-slash');
-                        }
+                // Use mousedown instead of click for better responsiveness
+                btn.addEventListener('mousedown', function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    togglePasswordVisibility(this);
+                });
+                
+                // Also support click for accessibility
+                btn.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    togglePasswordVisibility(this);
+                });
+                
+                // Support keyboard (Enter/Space)
+                btn.addEventListener('keydown', function (e) {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        togglePasswordVisibility(this);
                     }
                 });
             });
+            
+            function togglePasswordVisibility(btn) {
+                const targetId = btn.getAttribute('data-target');
+                const input = document.getElementById(targetId);
+                if (!input) {
+                    console.error('Input not found:', targetId);
+                    return;
+                }
+
+                const icon = btn.querySelector('i');
+                if (input.type === 'password') {
+                    input.type = 'text';
+                    if (icon) {
+                        icon.classList.remove('fa-eye-slash');
+                        icon.classList.add('fa-eye');
+                    }
+                    console.log('Password shown for:', targetId);
+                } else {
+                    input.type = 'password';
+                    if (icon) {
+                        icon.classList.remove('fa-eye');
+                        icon.classList.add('fa-eye-slash');
+                    }
+                    console.log('Password hidden for:', targetId);
+                }
+            }
         });
 
         // Show success message if exists
