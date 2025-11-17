@@ -705,13 +705,9 @@
             <p>Register to join our gallery</p>
         </div>
 
-        @if ($errors->any())
+        @if ($errors->has('error'))
         <div class="alert alert-danger">
-            <ul style="margin: 0; padding-left: 20px;">
-                @foreach ($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
+            <strong>Error:</strong> {{ $errors->first('error') }}
         </div>
         @endif
 
@@ -737,9 +733,13 @@
                 <label for="email">Email</label>
                 <div class="input-group">
                     <i class="fas fa-envelope"></i>
-                    <input type="email" name="email" id="email" class="form-control" placeholder="Enter your email" value="{{ old('email') }}" autocomplete="email" required>
+                    <input type="email" name="email" id="email" class="form-control @error('email') is-invalid @enderror" placeholder="Enter your email" value="{{ old('email') }}" autocomplete="email" required>
                 </div>
-                <span class="error-message" id="emailError"></span>
+                <span class="error-message" id="emailError">
+                    @error('email')
+                        {{ $message }}
+                    @enderror
+                </span>
             </div>
 
             <div class="form-group">
