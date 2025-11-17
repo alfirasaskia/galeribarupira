@@ -4637,8 +4637,8 @@
         // reCAPTCHA v3 - Auto execute on page load dengan error handling
         if (typeof grecaptcha !== 'undefined') {
             try {
-                grecaptcha.ready(function() {
-                    // reCAPTCHA loaded
+        grecaptcha.ready(function() {
+            // reCAPTCHA loaded
                     console.log('reCAPTCHA ready');
                 });
             } catch (e) {
@@ -4745,42 +4745,45 @@
                     }, 10000);
                     
                     // Execute reCAPTCHA v3 with proper error handling
+                    // Store grecaptcha reference to avoid undefined errors
+                    const grecaptchaRef = window.grecaptcha;
+                    
+                    if (!grecaptchaRef || typeof grecaptchaRef.ready !== 'function') {
+                        clearTimeout(recaptchaTimeout);
+                        console.warn('reCAPTCHA not available, submitting without token');
+                        document.getElementById('g-recaptcha-response').value = 'bypass';
+                        submitFormDirectly();
+                        return;
+                    }
+                    
                     try {
-                        // Double check before calling
-                        if (typeof grecaptcha === 'undefined' || typeof grecaptcha.ready !== 'function') {
-                            clearTimeout(recaptchaTimeout);
-                            console.warn('reCAPTCHA not available in try block, submitting without token');
-                            document.getElementById('g-recaptcha-response').value = 'bypass';
-                            submitFormDirectly();
-                            return;
-                        }
-                        
-                        grecaptcha.ready(function() {
+                        // Call grecaptcha.ready with stored reference
+                        grecaptchaRef.ready(function() {
                             clearTimeout(recaptchaTimeout);
                             
                             // Double check grecaptcha.execute is available
-                            if (typeof grecaptcha.execute === 'undefined') {
+                            if (!grecaptchaRef || typeof grecaptchaRef.execute !== 'function') {
                                 console.error('grecaptcha.execute is not available');
                                 document.getElementById('g-recaptcha-response').value = 'error';
                                 submitFormDirectly();
                                 return;
                             }
                             
-                            grecaptcha.execute('6Ld0ffcrAAAAAOtioZEl4nY5fpoJB745yD7yZesv', {action: 'submit'}).then(function(token) {
-                                // Add token to form
-                                document.getElementById('g-recaptcha-response').value = token;
-                                
-                                // Submit form via AJAX
-                                const formData = new FormData(contactForm);
-                                
+                            grecaptchaRef.execute('6Ld0ffcrAAAAAOtioZEl4nY5fpoJB745yD7yZesv', {action: 'submit'}).then(function(token) {
+                            // Add token to form
+                            document.getElementById('g-recaptcha-response').value = token;
+                            
+                            // Submit form via AJAX
+                            const formData = new FormData(contactForm);
+                            
                                 // Use absolute URL to avoid CORS issues
                                 const formAction = contactForm.action;
                                 const url = formAction.startsWith('http') ? formAction : window.location.origin + formAction;
                                 
                                 fetch(url, {
-                                    method: 'POST',
-                                    body: formData,
-                                    headers: {
+                                method: 'POST',
+                                body: formData,
+                                headers: {
                                         'X-Requested-With': 'XMLHttpRequest',
                                         'Accept': 'application/json'
                                     },
@@ -4790,7 +4793,7 @@
                                     const contentType = response.headers.get("content-type");
                                     let errorMessage = 'Gagal mengirim pesan. Silakan coba lagi.';
                                     
-                                    if (response.ok) {
+                                if (response.ok) {
                                         // Try to parse JSON response
                                         if (contentType && contentType.includes("application/json")) {
                                             const data = await response.json();
@@ -4799,29 +4802,29 @@
                                             }
                                         }
                                         
-                                        // Form submitted successfully
-                                        // Reset form
-                                        contactForm.reset();
-                                        submitBtn.disabled = false;
-                                        submitBtn.innerHTML = '<i class="bi bi-send me-2"></i>Kirim Pesan';
-                                        
-                                        // Show success message
-                                        Swal.fire({
-                                            icon: 'success',
-                                            title: 'Berhasil!',
-                                            text: 'Pesan Anda berhasil dikirim. Terima kasih!',
-                                            confirmButtonColor: '#1E40AF',
-                                            confirmButtonText: 'OK'
-                                        }).then(() => {
-                                            // Show rating modal after success message
-                                            setTimeout(() => {
+                                    // Form submitted successfully
+                                    // Reset form
+                                    contactForm.reset();
+                                    submitBtn.disabled = false;
+                                    submitBtn.innerHTML = '<i class="bi bi-send me-2"></i>Kirim Pesan';
+                                    
+                                    // Show success message
+                                    Swal.fire({
+                                        icon: 'success',
+                                        title: 'Berhasil!',
+                                        text: 'Pesan Anda berhasil dikirim. Terima kasih!',
+                                        confirmButtonColor: '#1E40AF',
+                                        confirmButtonText: 'OK'
+                                    }).then(() => {
+                                        // Show rating modal after success message
+                                        setTimeout(() => {
                                                 const ratingModal = document.getElementById('ratingModalBackdrop');
                                                 if (ratingModal) {
                                                     ratingModal.classList.add('show');
                                                 }
-                                            }, 500);
-                                        });
-                                    } else {
+                                        }, 500);
+                                    });
+                                } else {
                                         // Try to get error message from response
                                         if (contentType && contentType.includes("application/json")) {
                                             try {
@@ -4855,22 +4858,22 @@
                                         }
                                         
                                         throw new Error(errorMessage);
-                                    }
-                                })
-                                .catch(error => {
-                                    // Re-enable submit button
-                                    submitBtn.disabled = false;
-                                    submitBtn.innerHTML = '<i class="bi bi-send me-2"></i>Kirim Pesan';
-                                    
-                                    Swal.fire({
-                                        icon: 'error',
-                                        title: 'Error!',
+                                }
+                            })
+                            .catch(error => {
+                                // Re-enable submit button
+                                submitBtn.disabled = false;
+                                submitBtn.innerHTML = '<i class="bi bi-send me-2"></i>Kirim Pesan';
+                                
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Error!',
                                         text: error.message || 'Gagal mengirim pesan. Silakan coba lagi.',
-                                        confirmButtonColor: '#1E40AF',
-                                        confirmButtonText: 'OK'
-                                    });
+                                    confirmButtonColor: '#1E40AF',
+                                    confirmButtonText: 'OK'
                                 });
-                            }).catch(function(error) {
+                            });
+                        }).catch(function(error) {
                                 clearTimeout(recaptchaTimeout);
                                 console.error('reCAPTCHA execute error:', error);
                                 // Fallback: try to submit without token
@@ -4982,16 +4985,16 @@
                     }
                 })
                 .catch(error => {
-                    // Re-enable submit button
-                    submitBtn.disabled = false;
-                    submitBtn.innerHTML = '<i class="bi bi-send me-2"></i>Kirim Pesan';
-                    
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error!',
+                            // Re-enable submit button
+                            submitBtn.disabled = false;
+                            submitBtn.innerHTML = '<i class="bi bi-send me-2"></i>Kirim Pesan';
+                            
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error!',
                         text: error.message || 'Gagal mengirim pesan. Silakan coba lagi.',
-                        confirmButtonColor: '#1E40AF',
-                        confirmButtonText: 'OK'
+                                confirmButtonColor: '#1E40AF',
+                                confirmButtonText: 'OK'
                     });
                 });
             }
