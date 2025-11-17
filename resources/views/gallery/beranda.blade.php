@@ -4755,16 +4755,8 @@
             function submitFormDirectly() {
                 const formData = new FormData(contactForm);
                 
-                // Use current origin to avoid CORS issues (force HTTPS if on HTTPS)
-                let formAction = contactForm.action;
-                if (formAction.startsWith('/')) {
-                    // Relative path - use current origin
-                    formAction = window.location.origin + formAction;
-                }
-                // Ensure HTTPS if current page is HTTPS
-                if (window.location.protocol === 'https:' && formAction.startsWith('http://')) {
-                    formAction = formAction.replace('http://', 'https://');
-                }
+                // Use relative path - same domain, no CORS needed
+                const formAction = contactForm.action;
                 
                 fetch(formAction, {
                     method: 'POST',
@@ -4772,9 +4764,7 @@
                     headers: {
                         'X-Requested-With': 'XMLHttpRequest',
                         'Accept': 'application/json'
-                    },
-                    credentials: 'same-origin',
-                    mode: 'same-origin'
+                    }
                 })
                 .then(async response => {
                     const contentType = response.headers.get("content-type");
