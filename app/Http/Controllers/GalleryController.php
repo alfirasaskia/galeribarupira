@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Response;
 use Carbon\Carbon;
 use App\Models\News;
 use App\Models\Suggestion;
@@ -1469,6 +1471,83 @@ class GalleryController extends Controller
         session(['user_name' => $request->name, 'user_email' => $request->email]);
         
         return redirect()->route('user.profile.show', $userId)->with('success', 'Profil berhasil diperbarui!');
+    }
+    
+    // Download Photo
+    public function downloadPhoto($id)
+    {
+        try {
+            // Get photo from database
+            $foto = DB::table('foto')->where('id', $id)->first();
+            
+            if (!$foto) {
+                abort(404, 'Foto tidak ditemukan');
+            }
+            
+            // Determine file path
+            $filePath = null;
+            $fileName = $foto->file_name ?? ($foto->judul ?? 'foto') . '.jpg';
+            
+            // Try different path variations
+            if ($foto->file_path) {
+                // Try storage path first (new photos)
+                if (file_exists(public_path('storage/' . $foto->file_path))) {
+                    $filePath = public_path('storage/' . $foto->file_path);
+                } 
+                // Try direct public path (old photos)
+                elseif (file_exists(public_path($foto->file_path))) {
+                    $filePath = public_path($foto->file_path);
+                }
+                // Try without leading slash
+                elseif (file_exists(public_path(ltrim($foto->file_path, '/')))) {
+                    $filePath = public_path(ltrim($foto->file_path, '/'));
+                }
+                // Try storage/app/public path
+                elseif (file_exists(storage_path('app/public/' . $foto->file_path))) {
+                    $filePath = storage_path('app/public/' . $foto->file_path);
+                }
+            }
+            
+            if (!$filePath || !file_exists($filePath)) {
+                abort(404, 'File foto tidak ditemukan');
+            }
+            
+            // Track download activity
+            $userId = session('user_id');
+            if ($userId) {
+                try {
+                    DB::table('gallery_activities')->insert([
+                        'foto_id' => $id,
+                        'user_id' => $userId,
+                        'activity_type' => 'download',
+                        'content' => 'Download foto: ' . ($foto->judul ?? 'Foto'),
+                        'ip_address' => request()->ip(),
+                        'user_agent' => request()->userAgent(),
+                        'created_at' => now(),
+                        'updated_at' => now()
+                    ]);
+                } catch (\Exception $e) {
+                    // Log error but don't fail the download
+                    \Log::warning('Failed to track download activity: ' . $e->getMessage());
+                }
+            }
+            
+            // Clean filename for download
+            $downloadFileName = preg_replace('/[^a-z0-9._-]/i', '_', $fileName);
+            if (!pathinfo($downloadFileName, PATHINFO_EXTENSION)) {
+                $downloadFileName .= '.jpg';
+            }
+            
+            // Return file with download headers
+            return Response::download($filePath, $downloadFileName, [
+                'Content-Type' => 'image/jpeg',
+                'Content-Disposition' => 'attachment; filename="' . $downloadFileName . '"',
+            ]);
+            
+        } catch (\Exception $e) {
+            \Log::error('Download photo error: ' . $e->getMessage());
+            abort(500, 'Gagal mengunduh foto: ' . $e->getMessage());
+        }
     }
 }
 

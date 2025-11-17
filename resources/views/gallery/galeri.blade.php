@@ -3349,11 +3349,11 @@
         function handleDownloadDirect(fileUrl, judul, fotoId) {
             console.log('handleDownloadDirect called', { fileUrl, judul, fotoId });
             
-            if (!fileUrl) {
+            if (!fotoId) {
                 Swal.fire({
                     icon: 'error',
                     title: 'Error',
-                    text: 'URL foto tidak valid',
+                    text: 'ID foto tidak valid',
                     timer: 2000,
                     showConfirmButton: false,
                     toast: true,
@@ -3373,87 +3373,34 @@
                 position: 'top-end'
             });
             
-            // Track download activity
-            if (fotoId) {
-                fetch('/api/track-activity', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
-                    },
-                    body: JSON.stringify({
-                        foto_id: fotoId,
-                        user_id: isUserLoggedIn ? currentUser?.id : null,
-                        activity_type: 'download',
-                        content: 'Download foto: ' + judul
-                    })
-                }).catch(err => console.log('Track activity error:', err));
-            }
+            // Use server-side download endpoint to force download
+            const downloadUrl = `/download/photo/${fotoId}`;
             
-            // Try to download using fetch for better cross-origin support
-            fetch(fileUrl)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-                    return response.blob();
-                })
-                .then(blob => {
-                    // Create blob URL
-                    const blobUrl = window.URL.createObjectURL(blob);
-                    
-                    // Create temporary link and trigger download
-                    const link = document.createElement('a');
-                    link.href = blobUrl;
-                    link.download = (judul || 'foto').replace(/[^a-z0-9]/gi, '_').toLowerCase() + '.jpg';
-                    link.style.display = 'none';
-                    document.body.appendChild(link);
-                    link.click();
-                    
-                    // Clean up
-                    setTimeout(() => {
-                        document.body.removeChild(link);
-                        window.URL.revokeObjectURL(blobUrl);
-                    }, 100);
-                    
-                    // Show success message
-                    setTimeout(() => {
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Berhasil!',
-                            text: 'Foto berhasil diunduh',
-                            timer: 2000,
-                            showConfirmButton: false,
-                            toast: true,
-                            position: 'top-end'
-                        });
-                    }, 500);
-                })
-                .catch(error => {
-                    console.error('Download error:', error);
-                    // Fallback to direct link download
-                    const link = document.createElement('a');
-                    link.href = fileUrl;
-                    link.download = (judul || 'foto').replace(/[^a-z0-9]/gi, '_').toLowerCase() + '.jpg';
-                    link.target = '_blank';
-                    link.style.display = 'none';
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
-                    
-                    // Show success message
-                    setTimeout(() => {
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Berhasil!',
-                            text: 'Foto berhasil diunduh',
-                            timer: 2000,
-                            showConfirmButton: false,
-                            toast: true,
-                            position: 'top-end'
-                        });
-                    }, 500);
+            // Create temporary link and trigger download
+            const link = document.createElement('a');
+            link.href = downloadUrl;
+            link.download = (judul || 'foto').replace(/[^a-z0-9]/gi, '_').toLowerCase() + '.jpg';
+            link.style.display = 'none';
+            document.body.appendChild(link);
+            link.click();
+            
+            // Clean up
+            setTimeout(() => {
+                document.body.removeChild(link);
+            }, 100);
+            
+            // Show success message
+            setTimeout(() => {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Berhasil!',
+                    text: 'Foto berhasil diunduh',
+                    timer: 2000,
+                    showConfirmButton: false,
+                    toast: true,
+                    position: 'top-end'
                 });
+            }, 1000);
         }
         
         // Handle Download Function - iPhone Style
@@ -3473,11 +3420,11 @@
                 return false;
             }
             
-            if (!fileUrl) {
+            if (!fotoId) {
                 Swal.fire({
                     icon: 'error',
                     title: 'Error',
-                    text: 'URL foto tidak valid',
+                    text: 'ID foto tidak valid',
                     timer: 2000,
                     showConfirmButton: false,
                     toast: true,
@@ -3500,93 +3447,37 @@
                 }
             });
             
-            // Track download activity
-            if (fotoId) {
-                fetch('/api/track-activity', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
-                    },
-                    body: JSON.stringify({
-                        foto_id: fotoId,
-                        user_id: currentUser?.id,
-                        activity_type: 'download',
-                        content: 'Download foto: ' + (judul || 'foto')
-                    })
-                }).catch(err => console.log('Track activity error:', err));
-            }
+            // Use server-side download endpoint to force download
+            const downloadUrl = `/download/photo/${fotoId}`;
             
-            // Try to download using fetch for better cross-origin support
-            fetch(fileUrl)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
+            // Create temporary link and trigger download
+            const link = document.createElement('a');
+            link.href = downloadUrl;
+            link.download = (judul || 'foto').replace(/[^a-z0-9]/gi, '_').toLowerCase() + '.jpg';
+            link.style.display = 'none';
+            document.body.appendChild(link);
+            link.click();
+            
+            // Clean up
+            setTimeout(() => {
+                document.body.removeChild(link);
+            }, 100);
+            
+            // Show success message after a delay
+            setTimeout(() => {
+                Swal.fire({
+                    icon: 'success',
+                    title: '<i class="bi bi-check-circle" style="color: #34C759;"></i> Berhasil!',
+                    html: `<p style="color: #666;">Foto berhasil diunduh</p>`,
+                    timer: 2000,
+                    showConfirmButton: false,
+                    toast: true,
+                    position: 'top-end',
+                    customClass: {
+                        popup: 'rounded-4'
                     }
-                    return response.blob();
-                })
-                .then(blob => {
-                    // Create blob URL
-                    const blobUrl = window.URL.createObjectURL(blob);
-                    
-                    // Create temporary link and trigger download
-                    const link = document.createElement('a');
-                    link.href = blobUrl;
-                    link.download = (judul || 'foto').replace(/[^a-z0-9]/gi, '_').toLowerCase() + '.jpg';
-                    link.style.display = 'none';
-                    document.body.appendChild(link);
-                    link.click();
-                    
-                    // Clean up
-                    setTimeout(() => {
-                        document.body.removeChild(link);
-                        window.URL.revokeObjectURL(blobUrl);
-                    }, 100);
-                    
-                    // Show success message after a delay
-                    setTimeout(() => {
-                        Swal.fire({
-                            icon: 'success',
-                            title: '<i class="bi bi-check-circle" style="color: #34C759;"></i> Berhasil!',
-                            html: `<p style="color: #666;">Foto berhasil diunduh</p>`,
-                            timer: 2000,
-                            showConfirmButton: false,
-                            toast: true,
-                            position: 'top-end',
-                            customClass: {
-                                popup: 'rounded-4'
-                            }
-                        });
-                    }, 500);
-                })
-                .catch(error => {
-                    console.error('Download error:', error);
-                    // Fallback to direct link download
-                    const link = document.createElement('a');
-                    link.href = fileUrl;
-                    link.download = (judul || 'foto').replace(/[^a-z0-9]/gi, '_').toLowerCase() + '.jpg';
-                    link.target = '_blank';
-                    link.style.display = 'none';
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
-                    
-                    // Show success message after a delay
-                    setTimeout(() => {
-                        Swal.fire({
-                            icon: 'success',
-                            title: '<i class="bi bi-check-circle" style="color: #34C759;"></i> Berhasil!',
-                            html: `<p style="color: #666;">Foto berhasil diunduh</p>`,
-                            timer: 2000,
-                            showConfirmButton: false,
-                            toast: true,
-                            position: 'top-end',
-                            customClass: {
-                                popup: 'rounded-4'
-                            }
-                        });
-                    }, 500);
                 });
+            }, 1000);
             
             return false;
         }

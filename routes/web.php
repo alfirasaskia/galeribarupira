@@ -38,6 +38,9 @@ Route::get('/api/comments/{fotoId}', [GalleryController::class, 'getComments'])-
 Route::post('/api/comments', [GalleryController::class, 'storeComment'])->name('api.store.comment');
 Route::delete('/api/comments/{commentId}', [GalleryController::class, 'deleteComment'])->name('api.delete.comment');
 
+// Download Photo Route
+Route::get('/download/photo/{id}', [GalleryController::class, 'downloadPhoto'])->name('photo.download');
+
 // Access selection page
 Route::get('/access', function () {
     return view('auth.access');
