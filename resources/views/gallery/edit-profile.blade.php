@@ -596,7 +596,7 @@
                     </div>
                 @endif
 
-                <form action="{{ route('user.profile.update') }}" method="POST" enctype="multipart/form-data" id="editProfileForm">
+                <form action="{{ url('/user/profile/update') }}" method="POST" enctype="multipart/form-data" id="editProfileForm">
                     @csrf
                     @method('PUT')
 

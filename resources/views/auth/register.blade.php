@@ -721,7 +721,7 @@
         </div>
         @endif
 
-        <form action="{{ route('register.process') }}" method="POST" id="registerForm" autocomplete="on">
+        <form action="{{ url('/register') }}" method="POST" id="registerForm" autocomplete="on">
             @csrf
             
             <div class="form-group">

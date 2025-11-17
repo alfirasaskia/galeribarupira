@@ -21,6 +21,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Force HTTPS URLs in production and when behind proxy (Railway, etc)
+        if (app()->environment('production') || request()->header('X-Forwarded-Proto') === 'https') {
+            URL::forceScheme('https');
+        }
+        
         // Share unread suggestions count with all admin views
         View::composer([
             'admin.*',

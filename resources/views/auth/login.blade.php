@@ -436,7 +436,7 @@
     <div class="container">
         <!-- Sign In Form -->
         <div class="form-container">
-            <form method="POST" action="{{ route('login.process') }}" id="loginForm">
+            <form method="POST" action="{{ url('/login') }}" id="loginForm">
                 @csrf
                 <input type="hidden" name="intended_url" id="intendedUrl" value="">
                 

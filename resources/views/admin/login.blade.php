@@ -465,7 +465,7 @@
     <div class="container">
         <!-- Admin Login Form -->
         <div class="form-container">
-            <form method="POST" action="{{ route('admin.login.post') }}" id="loginForm">
+            <form method="POST" action="{{ url('/admin/login') }}" id="loginForm">
                 @csrf
                 
                 <div class="logo-container">
