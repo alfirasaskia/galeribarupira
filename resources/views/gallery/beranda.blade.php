@@ -4700,219 +4700,81 @@
                     
                     // Disable submit button
                     submitBtn.disabled = true;
-                    submitBtn.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>Memverifikasi...';
+                    submitBtn.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>Mengirim...';
                     
                     // Simpan nama ke variable global sebelum form di-reset
                     window.userNamaLengkap = document.querySelector('input[name="nama_lengkap"]')?.value || 'Anonymous';
                     
-                    // Check if grecaptcha script failed to load
-                    if (window.grecaptchaLoadError) {
-                        console.warn('reCAPTCHA script failed to load, submitting without token');
-                        document.getElementById('g-recaptcha-response').value = 'bypass';
-                        submitFormDirectly();
-                        return;
-                    }
+                    // SIMPLIFIED: Try reCAPTCHA, but if it fails, submit anyway
+                    // Check if reCAPTCHA is available (with multiple checks)
+                    const hasRecaptcha = typeof window.grecaptcha !== 'undefined' && 
+                                        typeof window.grecaptcha.ready === 'function' &&
+                                        typeof window.grecaptcha.execute === 'function' &&
+                                        !window.grecaptchaLoadError;
                     
-                    // Check if grecaptcha is available and ready - with more thorough check
-                    if (typeof grecaptcha === 'undefined') {
-                        console.warn('reCAPTCHA script not loaded, submitting without token');
-                        document.getElementById('g-recaptcha-response').value = 'bypass';
-                        submitFormDirectly();
-                        return;
-                    }
-                    
-                    // Check if grecaptcha.ready exists and is a function
-                    if (typeof grecaptcha.ready !== 'function') {
-                        console.warn('grecaptcha.ready is not a function, submitting without token');
-                        document.getElementById('g-recaptcha-response').value = 'bypass';
-                        submitFormDirectly();
-                        return;
-                    }
-                    
-                    // Additional safety check - wait a bit if grecaptcha just loaded
-                    if (!grecaptcha.ready) {
-                        console.warn('grecaptcha.ready is falsy, submitting without token');
-                        document.getElementById('g-recaptcha-response').value = 'bypass';
-                        submitFormDirectly();
-                        return;
-                    }
-                    
-                    // Set timeout for reCAPTCHA (10 seconds)
-                    let recaptchaTimeout = setTimeout(function() {
-                        console.warn('reCAPTCHA timeout, submitting without token');
-                        document.getElementById('g-recaptcha-response').value = 'timeout';
-                        submitFormDirectly();
-                    }, 10000);
-                    
-                    // Execute reCAPTCHA v3 with proper error handling
-                    // Store grecaptcha reference to avoid undefined errors
-                    const grecaptchaRef = window.grecaptcha;
-                    
-                    if (!grecaptchaRef || typeof grecaptchaRef.ready !== 'function') {
-                        clearTimeout(recaptchaTimeout);
-                        console.warn('reCAPTCHA not available, submitting without token');
-                        document.getElementById('g-recaptcha-response').value = 'bypass';
-                        submitFormDirectly();
-                        return;
-                    }
-                    
-                    try {
-                        // Call grecaptcha.ready with stored reference
-                        grecaptchaRef.ready(function() {
-                            clearTimeout(recaptchaTimeout);
-                            
-                            // Double check grecaptcha.execute is available
-                            if (!grecaptchaRef || typeof grecaptchaRef.execute !== 'function') {
-                                console.error('grecaptcha.execute is not available');
-                                document.getElementById('g-recaptcha-response').value = 'error';
-                                submitFormDirectly();
-                                return;
-                            }
-                            
-                            grecaptchaRef.execute('6Ld0ffcrAAAAAOtioZEl4nY5fpoJB745yD7yZesv', {action: 'submit'}).then(function(token) {
-                            // Add token to form
-                            document.getElementById('g-recaptcha-response').value = token;
-                            
-                            // Submit form via AJAX
-                            const formData = new FormData(contactForm);
-                            
-                                // Use absolute URL to avoid CORS issues
-                                const formAction = contactForm.action;
-                                const url = formAction.startsWith('http') ? formAction : window.location.origin + formAction;
+                    if (hasRecaptcha) {
+                        // Try to get reCAPTCHA token (with 3 second timeout)
+                        let recaptchaTimeout = setTimeout(function() {
+                            console.warn('reCAPTCHA timeout, submitting without token');
+                            document.getElementById('g-recaptcha-response').value = 'timeout';
+                            submitFormDirectly();
+                        }, 3000);
+                        
+                        try {
+                            window.grecaptcha.ready(function() {
+                                clearTimeout(recaptchaTimeout);
                                 
-                                fetch(url, {
-                                method: 'POST',
-                                body: formData,
-                                headers: {
-                                        'X-Requested-With': 'XMLHttpRequest',
-                                        'Accept': 'application/json'
-                                    },
-                                    credentials: 'same-origin'
+                                window.grecaptcha.execute('6Ld0ffcrAAAAAOtioZEl4nY5fpoJB745yD7yZesv', {action: 'submit'})
+                                .then(function(token) {
+                                    document.getElementById('g-recaptcha-response').value = token;
+                                    submitFormDirectly();
                                 })
-                                .then(async response => {
-                                    const contentType = response.headers.get("content-type");
-                                    let errorMessage = 'Gagal mengirim pesan. Silakan coba lagi.';
-                                    
-                                if (response.ok) {
-                                        // Try to parse JSON response
-                                        if (contentType && contentType.includes("application/json")) {
-                                            const data = await response.json();
-                                            if (data.message) {
-                                                errorMessage = data.message;
-                                            }
-                                        }
-                                        
-                                    // Form submitted successfully
-                                    // Reset form
-                                    contactForm.reset();
-                                    submitBtn.disabled = false;
-                                    submitBtn.innerHTML = '<i class="bi bi-send me-2"></i>Kirim Pesan';
-                                    
-                                    // Show success message
-                                    Swal.fire({
-                                        icon: 'success',
-                                        title: 'Berhasil!',
-                                        text: 'Pesan Anda berhasil dikirim. Terima kasih!',
-                                        confirmButtonColor: '#1E40AF',
-                                        confirmButtonText: 'OK'
-                                    }).then(() => {
-                                        // Show rating modal after success message
-                                        setTimeout(() => {
-                                                const ratingModal = document.getElementById('ratingModalBackdrop');
-                                                if (ratingModal) {
-                                                    ratingModal.classList.add('show');
-                                                }
-                                        }, 500);
-                                    });
-                                } else {
-                                        // Try to get error message from response
-                                        if (contentType && contentType.includes("application/json")) {
-                                            try {
-                                                const errorData = await response.json();
-                                                if (errorData.message) {
-                                                    errorMessage = errorData.message;
-                                                } else if (errorData.errors) {
-                                                    // Laravel validation errors
-                                                    const errors = Object.values(errorData.errors).flat();
-                                                    errorMessage = errors.join(', ');
-                                                }
-                                            } catch (e) {
-                                                // If JSON parsing fails, use default message
-                                            }
-                                        } else {
-                                            // Try to get text response
-                                            try {
-                                                const text = await response.text();
-                                                if (text) {
-                                                    // Try to extract error from HTML if it's a redirect
-                                                    const parser = new DOMParser();
-                                                    const doc = parser.parseFromString(text, 'text/html');
-                                                    const errorElement = doc.querySelector('.alert-danger, .error');
-                                                    if (errorElement) {
-                                                        errorMessage = errorElement.textContent.trim();
-                                                    }
-                                                }
-                                            } catch (e) {
-                                                // Use default message
-                                            }
-                                        }
-                                        
-                                        throw new Error(errorMessage);
-                                }
-                            })
-                            .catch(error => {
-                                // Re-enable submit button
-                                submitBtn.disabled = false;
-                                submitBtn.innerHTML = '<i class="bi bi-send me-2"></i>Kirim Pesan';
-                                
-                                Swal.fire({
-                                    icon: 'error',
-                                    title: 'Error!',
-                                        text: error.message || 'Gagal mengirim pesan. Silakan coba lagi.',
-                                    confirmButtonColor: '#1E40AF',
-                                    confirmButtonText: 'OK'
+                                .catch(function(error) {
+                                    clearTimeout(recaptchaTimeout);
+                                    console.warn('reCAPTCHA execute failed:', error);
+                                    document.getElementById('g-recaptcha-response').value = 'error';
+                                    submitFormDirectly();
                                 });
                             });
-                        }).catch(function(error) {
-                                clearTimeout(recaptchaTimeout);
-                                console.error('reCAPTCHA execute error:', error);
-                                // Fallback: try to submit without token
-                                document.getElementById('g-recaptcha-response').value = 'error';
-                                submitFormDirectly();
-                            });
-                        }).catch(function(error) {
+                        } catch (error) {
                             clearTimeout(recaptchaTimeout);
-                            console.error('grecaptcha.ready error:', error);
-                            // Fallback: submit without token
+                            console.warn('reCAPTCHA ready failed:', error);
                             document.getElementById('g-recaptcha-response').value = 'error';
                             submitFormDirectly();
-                        });
-                    } catch (error) {
-                        clearTimeout(recaptchaTimeout);
-                        console.error('grecaptcha.ready catch error:', error);
-                        // Fallback: submit without token
-                        document.getElementById('g-recaptcha-response').value = 'error';
+                        }
+                    } else {
+                        // reCAPTCHA not available, submit directly
+                        console.log('reCAPTCHA not available, submitting without token');
+                        document.getElementById('g-recaptcha-response').value = 'bypass';
                         submitFormDirectly();
                     }
                 });
             }
             
-            // Function to submit form directly (fallback when reCAPTCHA fails)
+            // Function to submit form directly (used as main submit function)
             function submitFormDirectly() {
                 const formData = new FormData(contactForm);
                 
-                // Use absolute URL to avoid CORS issues
-                const formAction = contactForm.action;
-                const url = formAction.startsWith('http') ? formAction : window.location.origin + formAction;
+                // Use current origin to avoid CORS issues (force HTTPS if on HTTPS)
+                let formAction = contactForm.action;
+                if (formAction.startsWith('/')) {
+                    // Relative path - use current origin
+                    formAction = window.location.origin + formAction;
+                }
+                // Ensure HTTPS if current page is HTTPS
+                if (window.location.protocol === 'https:' && formAction.startsWith('http://')) {
+                    formAction = formAction.replace('http://', 'https://');
+                }
                 
-                fetch(url, {
+                fetch(formAction, {
                     method: 'POST',
                     body: formData,
                     headers: {
                         'X-Requested-With': 'XMLHttpRequest',
                         'Accept': 'application/json'
                     },
-                    credentials: 'same-origin'
+                    credentials: 'same-origin',
+                    mode: 'same-origin'
                 })
                 .then(async response => {
                     const contentType = response.headers.get("content-type");
