@@ -715,7 +715,20 @@
                                             </div>
                                             
                                             <div class="d-flex justify-content-end gap-2" style="margin-top: 0.6rem; padding-top: 0.6rem; border-top: 1px solid #e5e7eb;">
-                                                <button class="btn btn-sm btn-outline-primary edit-agenda" data-id="{{ $item->id }}" data-bs-toggle="modal" data-bs-target="#editAgendaModal" style="font-size: 0.75rem; padding: 0.3rem 0.6rem;">
+                                                <button class="btn btn-sm btn-outline-primary edit-agenda" 
+                                                    data-id="{{ $item->id }}" 
+                                                    data-judul="{{ $item->judul }}"
+                                                    data-tanggal="{{ $item->tanggal }}"
+                                                    data-waktu-mulai="{{ $item->waktu_mulai }}"
+                                                    data-waktu-selesai="{{ $item->waktu_selesai }}"
+                                                    data-deskripsi="{{ $item->deskripsi }}"
+                                                    data-lokasi="{{ $item->lokasi }}"
+                                                    data-status="{{ $item->status }}"
+                                                    data-kelas="{{ $item->kelas }}"
+                                                    data-tipe="{{ $item->tipe }}"
+                                                    data-bs-toggle="modal" 
+                                                    data-bs-target="#editAgendaModal" 
+                                                    style="font-size: 0.75rem; padding: 0.3rem 0.6rem;">
                                                     <i class="fas fa-edit fa-fw"></i>
                                                 </button>
                                                 <button class="btn btn-sm btn-outline-danger delete-agenda" data-id="{{ $item->id }}" style="font-size: 0.75rem; padding: 0.3rem 0.6rem;">
@@ -825,47 +838,65 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <form id="editAgendaForm" method="POST">
+                    @if ($errors->any())
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <strong>Error:</strong>
+                            <ul class="mb-0 mt-2">
+                                @foreach ($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    @endif
+                    <form id="editAgendaForm" method="POST" action="/admin/agenda/1">
                         @csrf
                         @method('PUT')
                         <div class="row">
                             <div class="col-md-12 mb-3">
                                 <label class="form-label fw-semibold">Judul Agenda <span class="text-danger">*</span></label>
-                                <input type="text" name="judul" class="form-control" placeholder="Masukkan judul agenda" required>
+                                <input type="text" name="judul" class="form-control @error('judul') is-invalid @enderror" placeholder="Masukkan judul agenda" required>
+                                @error('judul')<span class="invalid-feedback d-block">{{ $message }}</span>@enderror
                             </div>
                             
                             <div class="col-md-6 mb-3">
                                 <label class="form-label fw-semibold">Tanggal <span class="text-danger">*</span></label>
-                                <input type="date" name="tanggal" class="form-control" required>
+                                <input type="date" name="tanggal" class="form-control @error('tanggal') is-invalid @enderror" required>
+                                @error('tanggal')<span class="invalid-feedback d-block">{{ $message }}</span>@enderror
                             </div>
                             
                             <div class="col-md-3 mb-3">
                                 <label class="form-label fw-semibold">Waktu Mulai <span class="text-danger">*</span></label>
-                                <input type="time" name="waktu_mulai" class="form-control" required>
+                                <input type="time" name="waktu_mulai" class="form-control @error('waktu_mulai') is-invalid @enderror" required>
+                                @error('waktu_mulai')<span class="invalid-feedback d-block">{{ $message }}</span>@enderror
                             </div>
                             
                             <div class="col-md-3 mb-3">
                                 <label class="form-label fw-semibold">Waktu Selesai <span class="text-danger">*</span></label>
-                                <input type="time" name="waktu_selesai" class="form-control" required>
+                                <input type="time" name="waktu_selesai" class="form-control @error('waktu_selesai') is-invalid @enderror" required>
+                                @error('waktu_selesai')<span class="invalid-feedback d-block">{{ $message }}</span>@enderror
                             </div>
                             
                             <div class="col-12 mb-3">
                                 <label class="form-label fw-semibold">Deskripsi</label>
-                                <textarea name="deskripsi" class="form-control" rows="3" placeholder="Masukkan deskripsi agenda"></textarea>
+                                <textarea name="deskripsi" class="form-control @error('deskripsi') is-invalid @enderror" rows="3" placeholder="Masukkan deskripsi agenda"></textarea>
+                                @error('deskripsi')<span class="invalid-feedback d-block">{{ $message }}</span>@enderror
                             </div>
                             
                             <div class="col-12 mb-3">
                                 <label class="form-label fw-semibold">Lokasi</label>
-                                <input type="text" name="lokasi" class="form-control" placeholder="Tempat pelaksanaan">
+                                <input type="text" name="lokasi" class="form-control @error('lokasi') is-invalid @enderror" placeholder="Tempat pelaksanaan">
+                                @error('lokasi')<span class="invalid-feedback d-block">{{ $message }}</span>@enderror
                             </div>
                             
                             <div class="col-md-6 mb-3">
                                 <label class="form-label fw-semibold">Status <span class="text-danger">*</span></label>
-                                <select name="status" class="form-select" required>
+                                <select name="status" class="form-select @error('status') is-invalid @enderror" required>
                                     <option value="aktif">Aktif</option>
                                     <option value="draft">Draft</option>
                                     <option value="selesai">Selesai</option>
                                 </select>
+                                @error('status')<span class="invalid-feedback d-block">{{ $message }}</span>@enderror
                             </div>
                         </div>
                         <!-- Hidden fields for other required data -->
@@ -1013,96 +1044,57 @@
                 });
             });
 
-            // Edit button wiring - fetch data from server
+            // Edit button wiring - use data from button attributes
             document.querySelectorAll('.edit-agenda').forEach(btn => {
                 btn.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    
                     const agendaId = this.dataset.id;
                     const form = document.getElementById('editAgendaForm');
                     
                     console.log('Edit button clicked for agenda:', agendaId);
                     
-                    // Fetch agenda data from server with cache-busting
-                    fetch(`/admin/agenda/${agendaId}?t=${Date.now()}`, {
-                        method: 'GET',
-                        headers: {
-                            'Accept': 'application/json',
-                            'X-Requested-With': 'XMLHttpRequest',
-                            'Cache-Control': 'no-cache, no-store, must-revalidate',
-                            'Pragma': 'no-cache',
-                            'Expires': '0'
-                        }
-                    })
-                    .then(response => {
-                        console.log('Response status:', response.status);
-                        if (!response.ok) {
-                            throw new Error(`HTTP error! status: ${response.status}`);
-                        }
-                        return response.json();
-                    })
-                    .then(data => {
-                        console.log('Fetched data:', data);
-                        
-                        // Populate form with fetched data
-                        form.querySelector('input[name="judul"]').value = data.judul || '';
-                        form.querySelector('input[name="tanggal"]').value = data.tanggal || '';
-                        form.querySelector('input[name="waktu_mulai"]').value = data.waktu_mulai || '00:00';
-                        form.querySelector('input[name="waktu_selesai"]').value = data.waktu_selesai || '23:59';
-                        form.querySelector('textarea[name="deskripsi"]').value = data.deskripsi || '';
-                        form.querySelector('input[name="lokasi"]').value = data.lokasi || '';
-                        form.querySelector('select[name="status"]').value = data.status || 'aktif';
-                        
-                        // Set form action with PUT method
-                        form.action = `/admin/agenda/${agendaId}`;
-                        form.method = 'POST';
-                        
-                        // Ensure PUT method is set
-                        let methodInput = form.querySelector('input[name="_method"]');
-                        if (!methodInput) {
-                            methodInput = document.createElement('input');
-                            methodInput.type = 'hidden';
-                            methodInput.name = '_method';
-                            methodInput.value = 'PUT';
-                            form.appendChild(methodInput);
-                        } else {
-                            methodInput.value = 'PUT';
-                        }
-                        
-                        console.log('Form action set to:', form.action, 'with method PUT');
-                        
-                        // Show the edit modal
-                        const modal = new bootstrap.Modal(document.getElementById('editAgendaModal'));
-                        modal.show();
-                    })
-                    .catch(error => {
-                        console.error('Error fetching agenda:', error);
-                        alert('Gagal memuat data agenda: ' + error.message);
-                    });
+                    // Populate form with data from button attributes
+                    form.querySelector('input[name="judul"]').value = this.dataset.judul || '';
+                    form.querySelector('input[name="tanggal"]').value = this.dataset.tanggal || '';
+                    form.querySelector('input[name="waktu_mulai"]').value = this.dataset.waktuMulai || '00:00';
+                    form.querySelector('input[name="waktu_selesai"]').value = this.dataset.waktuSelesai || '23:59';
+                    form.querySelector('textarea[name="deskripsi"]').value = this.dataset.deskripsi || '';
+                    form.querySelector('input[name="lokasi"]').value = this.dataset.lokasi || '';
+                    form.querySelector('select[name="status"]').value = this.dataset.status || 'aktif';
+                    form.querySelector('input[name="kelas"]').value = this.dataset.kelas || '';
+                    form.querySelector('input[name="tipe"]').value = this.dataset.tipe || '';
+                    
+                    // Set form action with PUT method
+                    form.action = `/admin/agenda/${agendaId}`;
+                    form.method = 'POST';
+                    
+                    console.log('Form action set to:', form.action);
+                    
+                    // Ensure PUT method is set
+                    let methodInput = form.querySelector('input[name="_method"]');
+                    if (!methodInput) {
+                        methodInput = document.createElement('input');
+                        methodInput.type = 'hidden';
+                        methodInput.name = '_method';
+                        methodInput.value = 'PUT';
+                        form.appendChild(methodInput);
+                    } else {
+                        methodInput.value = 'PUT';
+                    }
+                    
+                    console.log('Form ready for submission');
                 });
             });
             
-            // Form submit handler - refresh page after successful submit
-            const agendaForm = document.getElementById('agendaForm');
+            // Wire up form submit handler
             const editAgendaForm = document.getElementById('editAgendaForm');
-            
-            if (agendaForm) {
-                agendaForm.addEventListener('submit', function(e) {
-                    // Let form submit normally, then refresh after a short delay
-                    setTimeout(() => {
-                        location.reload();
-                    }, 500);
-                });
-            }
-            
             if (editAgendaForm) {
                 editAgendaForm.addEventListener('submit', function(e) {
-                    // Let form submit normally, then refresh after a short delay
-                    setTimeout(() => {
-                        location.reload();
-                    }, 500);
+                    console.log('Edit form submitted to:', this.action);
+                    // Let form submit normally
                 });
             }
+            
+            // Form submit - let it submit normally without any interference
             
             // Delete button functionality
             document.querySelectorAll('.delete-agenda').forEach(btn => {

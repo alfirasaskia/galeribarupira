@@ -56,7 +56,6 @@ class GalleryController extends Controller
         // Ambil berita terbit dari tabel news untuk ditampilkan pada #news tanpa ubah markup
         $publishedNews = News::where('status', 'published')
             ->orderByDesc(DB::raw('COALESCE(published_at, created_at)'))
-            ->limit(15)
             ->get();
 
         // Ambil agenda aktif/selesai untuk seksyen agenda beranda

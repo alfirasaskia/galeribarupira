@@ -921,11 +921,21 @@
                             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                         </div>
                         <div class="modal-body">
+                            @if ($errors->any())
+                                <div class="alert alert-danger">
+                                    <ul class="mb-0">
+                                        @foreach ($errors->all() as $error)
+                                            <li>{{ $error }}</li>
+                                        @endforeach
+                                    </ul>
+                                </div>
+                            @endif
                             <form action="{{ route('admin.berita.store') }}" method="POST" enctype="multipart/form-data" id="addNewsForm">
                                 @csrf
                                 <div class="mb-3">
                                     <label class="form-label fw-semibold">Judul</label>
-                                    <input type="text" name="title" class="form-control" required>
+                                    <input type="text" name="title" class="form-control @error('title') is-invalid @enderror" required>
+                                    @error('title')<span class="invalid-feedback">{{ $message }}</span>@enderror
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label fw-semibold">Ringkasan</label>
@@ -958,7 +968,8 @@
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label fw-semibold">Isi</label>
-                                    <textarea name="content" class="form-control" rows="8" required></textarea>
+                                    <textarea name="content" class="form-control @error('content') is-invalid @enderror" rows="8" required></textarea>
+                                    @error('content')<span class="invalid-feedback">{{ $message }}</span>@enderror
                                 </div>
                             </form>
                         </div>
@@ -1187,6 +1198,26 @@
             const tabButtons = document.querySelectorAll('.tab-btn');
             const newsCards = document.querySelectorAll('.news-card');
             
+            // Restore active tab from localStorage
+            const savedTab = localStorage.getItem('activeNewsTab') || 'berita';
+            const savedTabButton = document.querySelector(`.tab-btn[data-tab="${savedTab}"]`);
+            if (savedTabButton) {
+                tabButtons.forEach(btn => btn.classList.remove('active'));
+                savedTabButton.classList.add('active');
+                
+                // Apply filter for saved tab
+                newsCards.forEach(card => {
+                    const jenisBadge = card.querySelector('.jenis-badge');
+                    const cardType = jenisBadge ? jenisBadge.textContent.toLowerCase().trim() : 'berita';
+                    
+                    if (savedTab === 'all' || cardType === savedTab) {
+                        card.style.display = 'block';
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+            }
+            
             tabButtons.forEach(button => {
                 button.addEventListener('click', function() {
                     // Remove active class from all buttons
@@ -1196,6 +1227,9 @@
                     this.classList.add('active');
                     
                     const tabType = this.getAttribute('data-tab');
+                    
+                    // Save active tab to localStorage
+                    localStorage.setItem('activeNewsTab', tabType);
                     
                     // Filter news cards based on tab
                     newsCards.forEach(card => {
@@ -1210,6 +1244,15 @@
                     });
                 });
             });
+            
+            // Wire up Add News Form - ensure it submits
+            const addNewsForm = document.getElementById('addNewsForm');
+            if (addNewsForm) {
+                addNewsForm.addEventListener('submit', function(e) {
+                    // Let form submit normally
+                    console.log('Add news form submitted');
+                });
+            }
             
             // Wire up Edit modal
             const editModal = document.getElementById('editNewsModal');

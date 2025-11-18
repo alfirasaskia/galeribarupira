@@ -717,8 +717,8 @@ class AdminController extends Controller
             'judul' => 'required|string|max:255',
             'deskripsi' => 'nullable|string',
             'tanggal' => 'required|date',
-            'waktu_mulai' => 'nullable|date_format:H:i',
-            'waktu_selesai' => 'nullable|date_format:H:i',
+            'waktu_mulai' => 'nullable|string',
+            'waktu_selesai' => 'nullable|string',
             'lokasi' => 'nullable|string',
             'status' => 'required|in:aktif,draft,selesai'
         ]);
@@ -767,8 +767,8 @@ class AdminController extends Controller
             'judul' => 'required|string|max:255',
             'deskripsi' => 'nullable|string',
             'tanggal' => 'required|date',
-            'waktu_mulai' => 'nullable|date_format:H:i',
-            'waktu_selesai' => 'nullable|date_format:H:i',
+            'waktu_mulai' => 'nullable|string',
+            'waktu_selesai' => 'nullable|string',
             'lokasi' => 'nullable|string',
             'status' => 'required|in:aktif,draft,selesai'
         ]);

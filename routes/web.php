@@ -89,12 +89,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
         
         // Berita management (CRUD)
         Route::get('/berita', [\App\Http\Controllers\AdminBeritaController::class, 'index'])->name('berita.index');
-    Route::get('/berita/create', [\App\Http\Controllers\AdminBeritaController::class, 'create'])->name('berita.create');
-    Route::post('/berita', [\App\Http\Controllers\AdminBeritaController::class, 'store'])->name('berita.store');
-    Route::get('/berita/{beritum}', [\App\Http\Controllers\AdminBeritaController::class, 'show'])->name('berita.show');
-    Route::get('/berita/{beritum}/edit', [\App\Http\Controllers\AdminBeritaController::class, 'edit'])->name('berita.edit');
-    Route::put('/berita/{beritum}', [\App\Http\Controllers\AdminBeritaController::class, 'update'])->name('berita.update');
-    Route::delete('/berita/{beritum}', [\App\Http\Controllers\AdminBeritaController::class, 'destroy'])->name('berita.destroy');
+        Route::get('/berita/create', [\App\Http\Controllers\AdminBeritaController::class, 'create'])->name('berita.create');
+        Route::post('/berita', [\App\Http\Controllers\AdminBeritaController::class, 'store'])->name('berita.store');
+        Route::get('/berita/{beritum}', [\App\Http\Controllers\AdminBeritaController::class, 'show'])->name('berita.show');
+        Route::get('/berita/{beritum}/edit', [\App\Http\Controllers\AdminBeritaController::class, 'edit'])->name('berita.edit');
+        Route::put('/berita/{beritum}', [\App\Http\Controllers\AdminBeritaController::class, 'update'])->name('berita.update');
+        Route::delete('/berita/{beritum}', [\App\Http\Controllers\AdminBeritaController::class, 'destroy'])->name('berita.destroy');
     
     // Photos Management
     Route::get('/photos', [AdminController::class, 'photosIndex'])->name('photos.index');
@@ -143,7 +143,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::delete('/suggestions/{id}', [AdminController::class, 'suggestionsDestroy'])->name('suggestions.destroy');
     
     // Logout
-    Route::get('/logout', [AdminController::class, 'logout'])->name('logout');
+    Route::get('/logout', [AdminController::class, 'logout'])->name('logout.get');
     });
 });
 Route::get('/tim', [GalleryController::class, 'tim'])->name('gallery.tim');
