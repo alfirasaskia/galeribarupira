@@ -995,55 +995,83 @@
                     } else {
                         // Handle error response
                         let errorMessage = 'Terjadi kesalahan saat mendaftar. Silakan coba lagi.';
+                        let hasFieldErrors = false;
                         
                         if (contentType && contentType.includes('application/json')) {
                             try {
                                 const errorData = await response.json();
                                 console.log('❌ [REGISTER] Error response:', errorData);
+                                console.log('❌ [REGISTER] Error status:', response.status);
                                 
-                                if (errorData.message) {
-                                    errorMessage = errorData.message;
-                                } else if (errorData.errors) {
-                                    // Laravel validation errors
+                                // Prioritize errors object over message for more specific feedback
+                                if (errorData.errors && Object.keys(errorData.errors).length > 0) {
+                                    // Laravel validation errors - get all error messages
                                     const errors = Object.values(errorData.errors).flat();
                                     errorMessage = errors.join(', ');
+                                    hasFieldErrors = true;
+                                    
+                                    console.log('❌ [REGISTER] Validation errors found:', errors);
                                     
                                     // Display field-specific errors
                                     if (errorData.errors.name) {
                                         const nameError = document.getElementById('nameError');
-                                        nameError.textContent = errorData.errors.name[0];
-                                        nameError.classList.add('show');
+                                        if (nameError) {
+                                            nameError.textContent = errorData.errors.name[0];
+                                            nameError.classList.add('show');
+                                            console.log('❌ [REGISTER] Name error:', errorData.errors.name[0]);
+                                        }
                                     }
                                     if (errorData.errors.email) {
                                         const emailError = document.getElementById('emailError');
-                                        emailError.textContent = errorData.errors.email[0];
-                                        emailError.classList.add('show');
+                                        if (emailError) {
+                                            emailError.textContent = errorData.errors.email[0];
+                                            emailError.classList.add('show');
+                                            console.log('❌ [REGISTER] Email error:', errorData.errors.email[0]);
+                                        }
                                     }
                                     if (errorData.errors.password) {
                                         const passwordError = document.getElementById('passwordError');
-                                        passwordError.textContent = errorData.errors.password[0];
-                                        passwordError.classList.add('show');
+                                        if (passwordError) {
+                                            passwordError.textContent = errorData.errors.password[0];
+                                            passwordError.classList.add('show');
+                                            console.log('❌ [REGISTER] Password error:', errorData.errors.password[0]);
+                                        }
                                     }
+                                    if (errorData.errors.password_confirmation) {
+                                        const confirmError = document.getElementById('confirmError');
+                                        if (confirmError) {
+                                            confirmError.textContent = errorData.errors.password_confirmation[0];
+                                            confirmError.classList.add('show');
+                                            console.log('❌ [REGISTER] Password confirmation error:', errorData.errors.password_confirmation[0]);
+                                        }
+                                    }
+                                } else if (errorData.message) {
+                                    // Use message if no specific errors
+                                    errorMessage = errorData.message;
+                                    console.log('❌ [REGISTER] Error message:', errorData.message);
                                 }
                             } catch (parseError) {
                                 console.error('❌ [REGISTER] Error parsing JSON:', parseError);
+                                console.error('❌ [REGISTER] Parse error details:', parseError.message);
                             }
                         } else {
                             // Try to get text response
                             try {
                                 const text = await response.text();
-                                console.log('❌ [REGISTER] Error text response:', text.substring(0, 200));
+                                console.log('❌ [REGISTER] Error text response (first 500 chars):', text.substring(0, 500));
                             } catch (textError) {
                                 console.error('❌ [REGISTER] Error reading text:', textError);
                             }
                         }
                         
                         console.error('❌ [REGISTER] Registration failed:', errorMessage);
+                        console.error('❌ [REGISTER] Has field errors:', hasFieldErrors);
                         
+                        // Show error alert - if field errors are shown, use a more generic message
                         Swal.fire({
                             icon: 'error',
                             title: 'Registrasi Gagal',
-                            text: errorMessage,
+                            text: hasFieldErrors ? 'Mohon periksa kembali form registrasi Anda. Lihat detail error di bawah setiap field.' : errorMessage,
                             confirmButtonColor: '#1E40AF'
                         });
                         
