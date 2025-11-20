@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use App\Models\Otp;
 use App\Mail\SendOtpMail;
 
@@ -264,53 +265,60 @@ class AuthController extends Controller
             
             \Log::info('✅ [REGISTER] OTP saved to database', ['user_id' => $userId]);
             
-            // Kirim OTP ke email
-            \Log::info('🔵 [REGISTER] Attempting to send OTP email', [
-                'email' => $request->email,
-                'user_id' => $userId,
-                'mail_mailer' => config('mail.default'),
-                'mail_host' => config('mail.mailers.smtp.host'),
-                'mail_port' => config('mail.mailers.smtp.port'),
-            ]);
-            
-            try {
-                Mail::to($request->email)->send(new SendOtpMail($otpCode, $request->name));
-                \Log::info('✅ [REGISTER] OTP email sent successfully', ['email' => $request->email]);
-            } catch (\Exception $mailException) {
-                \Log::error('❌ [REGISTER] Failed to send OTP email', [
-                    'email' => $request->email,
-                    'error' => $mailException->getMessage(),
-                    'trace' => $mailException->getTraceAsString()
-                ]);
-                
-                // Delete user if email sending fails
-                DB::table('users')->where('id', $userId)->delete();
-                DB::table('otps')->where('user_id', $userId)->delete();
-                
-                $error = ['error' => 'Gagal mengirim email verifikasi. Silakan coba lagi.'];
-                if ($isAjax) {
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'Gagal mengirim email verifikasi',
-                        'errors' => $error
-                    ], 500);
-                }
-                return back()->withErrors($error)->withInput();
-            }
-            
-            // Simpan data user ke session untuk proses verifikasi
+            // Simpan data user ke session untuk proses verifikasi (SEBELUM kirim email)
             session()->put([
                 'pending_verification_user_id' => $userId,
                 'pending_verification_user_name' => $request->name,
                 'pending_verification_user_email' => $request->email
             ]);
             
+            // Kirim OTP ke email di background (tidak blocking)
+            // Gunakan queue jika tersedia, atau dispatch di background
+            try {
+                // Coba gunakan queue jika tersedia
+                if (config('queue.default') !== 'sync') {
+                    \Log::info('🔵 [REGISTER] Dispatching email to queue', ['email' => $request->email]);
+                    Mail::to($request->email)->queue(new SendOtpMail($otpCode, $request->name));
+                } else {
+                    // Jika queue tidak tersedia, kirim langsung tapi dengan timeout handling
+                    \Log::info('🔵 [REGISTER] Sending email directly (no queue)', [
+                        'email' => $request->email,
+                        'user_id' => $userId,
+                    ]);
+                    
+                    // Set timeout untuk email sending (max 10 detik)
+                    set_time_limit(10);
+                    try {
+                        Mail::to($request->email)->send(new SendOtpMail($otpCode, $request->name));
+                        \Log::info('✅ [REGISTER] OTP email sent successfully', ['email' => $request->email]);
+                    } catch (\Exception $e) {
+                        \Log::error('❌ [REGISTER] Failed to send OTP email', [
+                            'email' => $request->email,
+                            'error' => $e->getMessage()
+                        ]);
+                        // Jangan throw error, biarkan user tetap terdaftar
+                    }
+                    // Reset time limit
+                    set_time_limit(30);
+                }
+            } catch (\Exception $mailException) {
+                // Log error tapi jangan block registrasi
+                \Log::error('❌ [REGISTER] Failed to dispatch email', [
+                    'email' => $request->email,
+                    'error' => $mailException->getMessage(),
+                    'trace' => $mailException->getTraceAsString()
+                ]);
+                
+                // Jangan hapus user, biarkan user tetap terdaftar
+                // Email bisa dikirim ulang nanti
+            }
+            
             \Log::info('✅ [REGISTER] Registration completed successfully', [
                 'user_id' => $userId,
                 'email' => $request->email
             ]);
             
-            // Redirect ke halaman verifikasi OTP
+            // Redirect ke halaman verifikasi OTP (LANGSUNG, tidak tunggu email)
             $redirectUrl = route('verify.otp');
             $successMessage = 'Registrasi berhasil! Kode OTP telah dikirim ke email Anda. Silakan cek email dan masukkan kode verifikasi.';
             

@@ -267,6 +267,7 @@ Route::middleware(['check.admin'])->group(function () {
 
     // Suggestions Management Routes
     Route::get('/admin/suggestions', [AdminController::class, 'suggestionsIndex'])->name('admin.suggestions');
+    Route::get('/admin/suggestions', [AdminController::class, 'suggestionsIndex'])->name('admin.suggestions.index'); // Alias for compatibility
     Route::get('/admin/suggestions/{id}', [AdminController::class, 'suggestionsShow'])->name('admin.suggestions.show');
     Route::post('/admin/suggestions', [AdminController::class, 'suggestionsStore'])->name('admin.suggestions.store');
     Route::post('/admin/suggestions/{id}/status', [AdminController::class, 'suggestionsUpdateStatus'])->name('admin.suggestions.updateStatus');
