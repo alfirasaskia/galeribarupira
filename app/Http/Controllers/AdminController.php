@@ -1140,13 +1140,13 @@ class AdminController extends Controller
     {
         DB::table('suggestions')->where('id', $id)->delete();
         
-        return redirect()->route('admin.suggestions')->with('success', 'Saran berhasil dihapus!');
+        return redirect()->route('admin.suggestions.index')->with('success', 'Saran berhasil dihapus!');
     }
     
     public function suggestionsUpdateStatus(Request $request, $id)
     {
         if (!session('admin_id')) {
-            return redirect()->route('admin.suggestions')->with('error', 'Unauthorized');
+            return redirect()->route('admin.suggestions.index')->with('error', 'Unauthorized');
         }
         
         $status = $request->input('status');
@@ -1154,13 +1154,13 @@ class AdminController extends Controller
         // Validate status
         $validStatuses = ['pending', 'read', 'approved', 'rejected'];
         if (!in_array($status, $validStatuses)) {
-            return redirect()->route('admin.suggestions')->with('error', 'Status tidak valid');
+            return redirect()->route('admin.suggestions.index')->with('error', 'Status tidak valid');
         }
         
         // Check if suggestion exists
         $suggestion = DB::table('suggestions')->where('id', $id)->first();
         if (!$suggestion) {
-            return redirect()->route('admin.suggestions')->with('error', 'Saran tidak ditemukan');
+            return redirect()->route('admin.suggestions.index')->with('error', 'Saran tidak ditemukan');
         }
         
         // Update status
@@ -1177,32 +1177,32 @@ class AdminController extends Controller
             'rejected' => 'Ditolak'
         ];
         
-        return redirect()->route('admin.suggestions')->with('success', 'Status berhasil diubah menjadi: ' . $statusLabels[$status]);
+        return redirect()->route('admin.suggestions.index')->with('success', 'Status berhasil diubah menjadi: ' . $statusLabels[$status]);
     }
     
     public function suggestionsUpdateMultipleStatus(Request $request, $id)
     {
         if (!session('admin_id')) {
-            return redirect()->route('admin.suggestions')->with('error', 'Unauthorized');
+            return redirect()->route('admin.suggestions.index')->with('error', 'Unauthorized');
         }
         
         $statuses = $request->input('statuses', []);
         
         if (empty($statuses)) {
-            return redirect()->route('admin.suggestions')->with('error', 'Silakan pilih minimal 1 status');
+            return redirect()->route('admin.suggestions.index')->with('error', 'Silakan pilih minimal 1 status');
         }
         
         // Check if suggestion exists
         $suggestion = DB::table('suggestions')->where('id', $id)->first();
         if (!$suggestion) {
-            return redirect()->route('admin.suggestions')->with('error', 'Saran tidak ditemukan');
+            return redirect()->route('admin.suggestions.index')->with('error', 'Saran tidak ditemukan');
         }
         
         // Validate statuses
         $validStatuses = ['pending', 'read', 'approved', 'rejected'];
         foreach ($statuses as $status) {
             if (!in_array($status, $validStatuses)) {
-                return redirect()->route('admin.suggestions')->with('error', 'Status tidak valid');
+                return redirect()->route('admin.suggestions.index')->with('error', 'Status tidak valid');
             }
         }
         
@@ -1234,26 +1234,26 @@ class AdminController extends Controller
             return $statusLabels[$s] ?? $s;
         }, $statuses);
         
-        return redirect()->route('admin.suggestions')->with('success', 'Status berhasil diubah. Pilihan: ' . implode(', ', $selectedLabels) . '. Status akhir: ' . $statusLabels[$finalStatus]);
+        return redirect()->route('admin.suggestions.index')->with('success', 'Status berhasil diubah. Pilihan: ' . implode(', ', $selectedLabels) . '. Status akhir: ' . $statusLabels[$finalStatus]);
     }
     
     public function suggestionsBulkUpdateStatus(Request $request)
     {
         if (!session('admin_id')) {
-            return redirect()->route('admin.suggestions')->with('error', 'Unauthorized');
+            return redirect()->route('admin.suggestions.index')->with('error', 'Unauthorized');
         }
         
         $ids = $request->input('ids', []);
         $status = $request->input('status');
         
         if (empty($ids)) {
-            return redirect()->route('admin.suggestions')->with('error', 'Tidak ada saran yang dipilih');
+            return redirect()->route('admin.suggestions.index')->with('error', 'Tidak ada saran yang dipilih');
         }
         
         // Validate status
         $validStatuses = ['pending', 'read', 'approved', 'rejected'];
         if (!in_array($status, $validStatuses)) {
-            return redirect()->route('admin.suggestions')->with('error', 'Status tidak valid');
+            return redirect()->route('admin.suggestions.index')->with('error', 'Status tidak valid');
         }
         
         // Update status for all selected suggestions
@@ -1272,25 +1272,25 @@ class AdminController extends Controller
         ];
         
         $count = count($ids);
-        return redirect()->route('admin.suggestions')->with('success', "Berhasil mengubah status {$count} saran menjadi: " . $statusLabels[$status]);
+        return redirect()->route('admin.suggestions.index')->with('success', "Berhasil mengubah status {$count} saran menjadi: " . $statusLabels[$status]);
     }
     
     public function suggestionsBulkDelete(Request $request)
     {
         if (!session('admin_id')) {
-            return redirect()->route('admin.suggestions')->with('error', 'Unauthorized');
+            return redirect()->route('admin.suggestions.index')->with('error', 'Unauthorized');
         }
         
         $ids = $request->input('ids', []);
         
         if (empty($ids)) {
-            return redirect()->route('admin.suggestions')->with('error', 'Tidak ada saran yang dipilih');
+            return redirect()->route('admin.suggestions.index')->with('error', 'Tidak ada saran yang dipilih');
         }
         
         // Delete all selected suggestions
         $deleted = DB::table('suggestions')->whereIn('id', $ids)->delete();
         
-        return redirect()->route('admin.suggestions')->with('success', "Berhasil menghapus {$deleted} saran");
+        return redirect()->route('admin.suggestions.index')->with('success', "Berhasil menghapus {$deleted} saran");
     }
     
     // Petugas Management
@@ -1799,9 +1799,9 @@ class AdminController extends Controller
                 'updated_at' => now()
             ]);
             
-            return redirect()->route('admin.suggestions')->with('success', 'Rating disetujui dan akan ditampilkan di testimoni');
+            return redirect()->route('admin.suggestions.index')->with('success', 'Rating disetujui dan akan ditampilkan di testimoni');
         } catch (\Exception $e) {
-            return redirect()->route('admin.suggestions')->with('error', 'Gagal menyetujui rating: ' . $e->getMessage());
+            return redirect()->route('admin.suggestions.index')->with('error', 'Gagal menyetujui rating: ' . $e->getMessage());
         }
     }
     
@@ -1811,9 +1811,9 @@ class AdminController extends Controller
         try {
             DB::table('ratings')->where('id', $id)->delete();
             
-            return redirect()->route('admin.suggestions')->with('success', 'Rating berhasil dihapus');
+            return redirect()->route('admin.suggestions.index')->with('success', 'Rating berhasil dihapus');
         } catch (\Exception $e) {
-            return redirect()->route('admin.suggestions')->with('error', 'Gagal menghapus rating: ' . $e->getMessage());
+            return redirect()->route('admin.suggestions.index')->with('error', 'Gagal menghapus rating: ' . $e->getMessage());
         }
     }
 }
