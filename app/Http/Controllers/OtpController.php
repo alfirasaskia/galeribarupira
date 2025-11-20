@@ -128,24 +128,31 @@ class OtpController extends Controller
 
         // Kirim email OTP
         try {
-            \Log::info('Attempting to resend OTP email', [
+            \Log::info('🔵 [OTP] Attempting to resend OTP email via Brevo', [
                 'email' => $user->email,
                 'otp_code' => $otpCode,
                 'user_id' => $userId,
                 'mail_mailer' => config('mail.default'),
                 'mail_host' => config('mail.mailers.smtp.host'),
                 'mail_port' => config('mail.mailers.smtp.port'),
+                'mail_encryption' => config('mail.mailers.smtp.encryption'),
+                'mail_from_address' => config('mail.from.address'),
+                'mail_from_name' => config('mail.from.name'),
+                'mail_username_set' => !empty(config('mail.mailers.smtp.username')),
             ]);
             
             \Mail::to($user->email)->send(new \App\Mail\SendOtpMail($otpCode, $user->name));
             
-            \Log::info('OTP email resent successfully', ['email' => $user->email]);
+            \Log::info('✅ [OTP] OTP email resent successfully via Brevo', ['email' => $user->email]);
             return back()->with('success', 'Kode OTP baru telah dikirim ke email Anda.');
         } catch (\Exception $e) {
-            \Log::error('Failed to resend OTP email', [
+            \Log::error('❌ [OTP] Failed to resend OTP email via Brevo', [
                 'email' => $user->email,
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
+                'mail_host' => config('mail.mailers.smtp.host'),
+                'mail_port' => config('mail.mailers.smtp.port'),
+                'mail_encryption' => config('mail.mailers.smtp.encryption'),
             ]);
             return back()->withErrors(['error' => 'Gagal mengirim email. Silakan coba lagi. Error: ' . $e->getMessage()]);
         }

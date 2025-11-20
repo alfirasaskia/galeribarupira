@@ -284,17 +284,26 @@ class AuthController extends Controller
                     \Log::info('🔵 [REGISTER] Sending email directly (no queue)', [
                         'email' => $request->email,
                         'user_id' => $userId,
+                        'mail_mailer' => config('mail.default'),
+                        'mail_host' => config('mail.mailers.smtp.host'),
+                        'mail_port' => config('mail.mailers.smtp.port'),
+                        'mail_from_address' => config('mail.from.address'),
+                        'mail_from_name' => config('mail.from.name'),
+                        'mail_username' => config('mail.mailers.smtp.username') ? '***' : 'not_set',
                     ]);
                     
                     // Set timeout untuk email sending (max 10 detik)
                     set_time_limit(10);
                     try {
                         Mail::to($request->email)->send(new SendOtpMail($otpCode, $request->name));
-                        \Log::info('✅ [REGISTER] OTP email sent successfully', ['email' => $request->email]);
+                        \Log::info('✅ [REGISTER] OTP email sent successfully via Brevo', ['email' => $request->email]);
                     } catch (\Exception $e) {
                         \Log::error('❌ [REGISTER] Failed to send OTP email', [
                             'email' => $request->email,
-                            'error' => $e->getMessage()
+                            'error' => $e->getMessage(),
+                            'error_trace' => $e->getTraceAsString(),
+                            'mail_host' => config('mail.mailers.smtp.host'),
+                            'mail_port' => config('mail.mailers.smtp.port'),
                         ]);
                         // Jangan throw error, biarkan user tetap terdaftar
                     }

@@ -6,6 +6,7 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
+use Illuminate\Mail\Mailables\Address;
 use Illuminate\Queue\SerializesModels;
 
 class SendOtpMail extends Mailable
@@ -29,8 +30,13 @@ class SendOtpMail extends Mailable
      */
     public function envelope(): Envelope
     {
+        $fromAddress = config('mail.from.address', env('MAIL_FROM_ADDRESS', 'tanziljws@gmail.com'));
+        $fromName = config('mail.from.name', env('MAIL_FROM_NAME', 'SMKN 4 Bogor - Piragalery'));
+        
         return new Envelope(
+            from: new Address($fromAddress, $fromName),
             subject: 'Kode Verifikasi Email - Piragalery',
+            replyTo: [new Address($fromAddress, $fromName)],
         );
     }
 
