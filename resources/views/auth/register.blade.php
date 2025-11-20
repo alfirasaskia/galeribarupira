@@ -1063,12 +1063,13 @@
                         submitBtn.innerHTML = 'Sign Up';
                     }
                 }
-        });
-
-        // Toggle show/hide password fields
-        document.addEventListener('DOMContentLoaded', function () {
+            });
+            
+            // ============================================
+            // TOGGLE PASSWORD VISIBILITY
+            // ============================================
             const toggleButtons = document.querySelectorAll('.toggle-password');
-            console.log('Found toggle buttons:', toggleButtons.length);
+            console.log('🔵 [REGISTER] Found toggle buttons:', toggleButtons.length);
             
             toggleButtons.forEach(function (btn) {
                 // Use mousedown instead of click for better responsiveness
@@ -1099,7 +1100,7 @@
                 const targetId = btn.getAttribute('data-target');
                     const input = document.getElementById(targetId);
                 if (!input) {
-                    console.error('Input not found:', targetId);
+                    console.error('❌ [REGISTER] Input not found:', targetId);
                     return;
                 }
 
@@ -1110,14 +1111,14 @@
                             icon.classList.remove('fa-eye-slash');
                             icon.classList.add('fa-eye');
                         }
-                    console.log('Password shown for:', targetId);
+                    console.log('🔵 [REGISTER] Password shown for:', targetId);
                     } else {
                         input.type = 'password';
                         if (icon) {
                             icon.classList.remove('fa-eye');
                             icon.classList.add('fa-eye-slash');
                     }
-                    console.log('Password hidden for:', targetId);
+                    console.log('🔵 [REGISTER] Password hidden for:', targetId);
                         }
                     }
         });
