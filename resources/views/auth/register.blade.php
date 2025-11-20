@@ -947,23 +947,24 @@
                     console.log('🔵 [REGISTER] Response content-type:', contentType);
                     
                     if (response.ok) {
-                        // Check if it's a redirect (HTML response)
-                        if (contentType && contentType.includes('text/html')) {
-                            const text = await response.text();
-                            console.log('🔵 [REGISTER] HTML response received, redirecting...');
-                            // If response contains redirect, follow it
-                            window.location.href = response.url;
-                            return;
-                        }
-                        
-                        // Try to parse JSON response
+                        // Try to parse JSON response first
                         if (contentType && contentType.includes('application/json')) {
                             const data = await response.json();
                             console.log('✅ [REGISTER] Success response:', data);
                             
                             if (data.redirect) {
-                                console.log('🔵 [REGISTER] Redirecting to:', data.redirect);
-                                window.location.href = data.redirect;
+                                console.log('🔵 [REGISTER] Redirecting to OTP page:', data.redirect);
+                                // Show success message briefly then redirect
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Registrasi Berhasil!',
+                                    text: data.message || 'Kode OTP telah dikirim ke email Anda',
+                                    confirmButtonColor: '#1E40AF',
+                                    timer: 2000,
+                                    showConfirmButton: true
+                                }).then(() => {
+                                    window.location.href = data.redirect;
+                                });
                             } else {
                                 // Show success message
                                 Swal.fire({
@@ -971,16 +972,25 @@
                                     title: 'Registrasi Berhasil!',
                                     text: data.message || 'Silakan cek email Anda untuk verifikasi',
                                     confirmButtonColor: '#1E40AF'
-                                }).then(() => {
-                                    if (data.redirect) {
-                                        window.location.href = data.redirect;
-                                    }
                                 });
                             }
+                        } else if (contentType && contentType.includes('text/html')) {
+                            // HTML response (redirect from server)
+                            console.log('🔵 [REGISTER] HTML redirect response, following redirect...');
+                            // Laravel redirect returns HTML, extract redirect URL from response
+                            const text = await response.text();
+                            // Try to extract redirect URL from meta refresh or location header
+                            const redirectMatch = text.match(/window\.location\.href\s*=\s*['"]([^'"]+)['"]/);
+                            if (redirectMatch) {
+                                window.location.href = redirectMatch[1];
+                            } else {
+                                // Fallback: use response URL or default to verify-otp
+                                window.location.href = '/verify-otp';
+                            }
                         } else {
-                            // Assume success and redirect
-                            console.log('🔵 [REGISTER] Non-JSON success response, reloading page...');
-                            window.location.reload();
+                            // Unknown content type, redirect to OTP page
+                            console.log('🔵 [REGISTER] Unknown response type, redirecting to OTP page...');
+                            window.location.href = '/verify-otp';
                         }
                     } else {
                         // Handle error response

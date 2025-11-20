@@ -314,6 +314,7 @@ class AuthController extends Controller
             $redirectUrl = route('verify.otp');
             $successMessage = 'Registrasi berhasil! Kode OTP telah dikirim ke email Anda. Silakan cek email dan masukkan kode verifikasi.';
             
+            // Always return JSON for AJAX requests to ensure proper redirect
             if ($isAjax) {
                 return response()->json([
                     'success' => true,
@@ -322,6 +323,7 @@ class AuthController extends Controller
                 ], 200);
             }
             
+            // For non-AJAX requests, redirect normally
             return redirect($redirectUrl)->with('success', $successMessage);
             
         } catch (\Illuminate\Validation\ValidationException $e) {
