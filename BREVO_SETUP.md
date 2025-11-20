@@ -32,10 +32,42 @@ MAIL_FROM_NAME="SMKN 4 Bogor - Piragalery"
 
 ## Catatan Penting
 
-1. Pastikan API key yang digunakan adalah **SMTP key**, bukan API key biasa
-2. Email `tanziljws@gmail.com` harus sudah terverifikasi di akun Brevo
-3. Setelah update `.env`, jalankan `php artisan config:clear` untuk clear cache konfigurasi
-4. Test email dengan melakukan registrasi atau request OTP
+1. **SMTP API Key**: Pastikan API key yang digunakan adalah **SMTP key** (dimulai dengan `xkeysib-`), bukan API key biasa
+   - Cara mendapatkan: Login ke Brevo → Settings → SMTP & API → SMTP Keys → Create New Key
+   - Format: `xkeysib-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx-XXXXXXXXXXXXX`
+2. **Email Verification**: Email `tanziljws@gmail.com` harus sudah terverifikasi di akun Brevo
+   - Login ke Brevo → Settings → Senders → Verify your sender email
+3. **After Update**: Setelah update `.env`, jalankan:
+   ```bash
+   php artisan config:clear
+   php artisan cache:clear
+   ```
+4. **Testing**: Test email dengan melakukan registrasi atau request OTP
+
+## Troubleshooting Email Tidak Terkirim
+
+### 1. Cek API Key Format
+- ✅ **Benar**: `xkeysib-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx-XXXXXXXXXXXXX` (format SMTP key dari Brevo)
+- ❌ **Salah**: `xxxxxxxxxxxxxxxxxxxx` (tanpa prefix `xkeysib-`)
+
+### 2. Cek Email Verifikasi di Brevo
+- Login ke https://app.brevo.com
+- Settings → Senders
+- Pastikan `tanziljws@gmail.com` statusnya **"Verified"** (bukan "Pending")
+
+### 3. Cek Log Laravel
+```bash
+tail -f storage/logs/laravel.log | grep -i "otp\|mail\|brevo"
+```
+
+### 4. Test Koneksi SMTP
+- Pastikan server dapat mengakses `smtp-relay.brevo.com:587`
+- Cek firewall tidak memblokir port 587
+
+### 5. Common Errors
+- **"Authentication failed"**: API key salah atau expired
+- **"Connection timeout"**: Firewall block atau network issue
+- **"Invalid sender"**: Email belum terverifikasi di Brevo
 
 ## Testing
 

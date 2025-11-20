@@ -292,20 +292,33 @@ class AuthController extends Controller
                         'mail_username' => config('mail.mailers.smtp.username') ? '***' : 'not_set',
                     ]);
                     
-                    // Set timeout untuk email sending (max 10 detik)
-                    set_time_limit(10);
+                    // Set timeout untuk email sending (max 15 detik untuk Brevo)
+                    set_time_limit(15);
                     try {
                         Mail::to($request->email)->send(new SendOtpMail($otpCode, $request->name));
-                        \Log::info('✅ [REGISTER] OTP email sent successfully via Brevo', ['email' => $request->email]);
-                    } catch (\Exception $e) {
-                        \Log::error('❌ [REGISTER] Failed to send OTP email', [
+                        \Log::info('✅ [REGISTER] OTP email sent successfully via Brevo', [
+                            'email' => $request->email,
+                            'from_address' => config('mail.from.address')
+                        ]);
+                    } catch (\Swift_TransportException $e) {
+                        \Log::error('❌ [REGISTER] Swift Transport Exception - Brevo connection failed', [
                             'email' => $request->email,
                             'error' => $e->getMessage(),
+                            'error_code' => $e->getCode(),
+                            'mail_host' => config('mail.mailers.smtp.host'),
+                            'mail_port' => config('mail.mailers.smtp.port'),
+                            'mail_username' => config('mail.mailers.smtp.username'),
+                            'mail_password_set' => !empty(config('mail.mailers.smtp.password')),
+                        ]);
+                    } catch (\Exception $e) {
+                        \Log::error('❌ [REGISTER] Failed to send OTP email - General Exception', [
+                            'email' => $request->email,
+                            'error' => $e->getMessage(),
+                            'error_class' => get_class($e),
                             'error_trace' => $e->getTraceAsString(),
                             'mail_host' => config('mail.mailers.smtp.host'),
                             'mail_port' => config('mail.mailers.smtp.port'),
                         ]);
-                        // Jangan throw error, biarkan user tetap terdaftar
                     }
                     // Reset time limit
                     set_time_limit(30);

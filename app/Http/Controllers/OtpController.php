@@ -139,16 +139,33 @@ class OtpController extends Controller
                 'mail_from_address' => config('mail.from.address'),
                 'mail_from_name' => config('mail.from.name'),
                 'mail_username_set' => !empty(config('mail.mailers.smtp.username')),
+                'mail_password_set' => !empty(config('mail.mailers.smtp.password')),
             ]);
+            
+            set_time_limit(15); // Set timeout untuk Brevo
             
             \Mail::to($user->email)->send(new \App\Mail\SendOtpMail($otpCode, $user->name));
             
-            \Log::info('✅ [OTP] OTP email resent successfully via Brevo', ['email' => $user->email]);
+            \Log::info('✅ [OTP] OTP email resent successfully via Brevo', [
+                'email' => $user->email,
+                'from_address' => config('mail.from.address')
+            ]);
             return back()->with('success', 'Kode OTP baru telah dikirim ke email Anda.');
-        } catch (\Exception $e) {
-            \Log::error('❌ [OTP] Failed to resend OTP email via Brevo', [
+        } catch (\Swift_TransportException $e) {
+            \Log::error('❌ [OTP] Swift Transport Exception - Brevo connection failed', [
                 'email' => $user->email,
                 'error' => $e->getMessage(),
+                'error_code' => $e->getCode(),
+                'mail_host' => config('mail.mailers.smtp.host'),
+                'mail_port' => config('mail.mailers.smtp.port'),
+                'mail_username' => config('mail.mailers.smtp.username'),
+            ]);
+            return back()->withErrors(['error' => 'Gagal mengirim email melalui Brevo. Error: ' . $e->getMessage() . ' (Code: ' . $e->getCode() . ')']);
+        } catch (\Exception $e) {
+            \Log::error('❌ [OTP] Failed to resend OTP email via Brevo - General Exception', [
+                'email' => $user->email,
+                'error' => $e->getMessage(),
+                'error_class' => get_class($e),
                 'trace' => $e->getTraceAsString(),
                 'mail_host' => config('mail.mailers.smtp.host'),
                 'mail_port' => config('mail.mailers.smtp.port'),
