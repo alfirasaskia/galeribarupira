@@ -1069,7 +1069,21 @@
                             methodInput.value = 'PUT';
                         }
                         
+                        // Ensure CSRF token exists
+                        let csrfInput = form.querySelector('input[name="_token"]');
+                        if (!csrfInput) {
+                            const csrfToken = document.querySelector('meta[name="csrf-token"]');
+                            if (csrfToken) {
+                                csrfInput = document.createElement('input');
+                                csrfInput.type = 'hidden';
+                                csrfInput.name = '_token';
+                                csrfInput.value = csrfToken.content;
+                                form.appendChild(csrfInput);
+                            }
+                        }
+                        
                         console.log('Form action set to:', form.action, 'with method PUT');
+                        console.log('Form data prepared for agenda ID:', agendaId);
                         
                         // Show the edit modal
                         const modal = new bootstrap.Modal(document.getElementById('editAgendaModal'));
@@ -1096,11 +1110,77 @@
             }
             
             if (editAgendaForm) {
-                editAgendaForm.addEventListener('submit', function(e) {
-                    // Let form submit normally, then refresh after a short delay
-                    setTimeout(() => {
-                        location.reload();
-                    }, 500);
+                editAgendaForm.addEventListener('submit', async function(e) {
+                    e.preventDefault();
+                    
+                    const form = this;
+                    const formData = new FormData(form);
+                    const submitBtn = form.closest('.modal').querySelector('button[type="submit"]');
+                    const originalBtnText = submitBtn.innerHTML;
+                    
+                    // Disable submit button
+                    submitBtn.disabled = true;
+                    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Menyimpan...';
+                    
+                    try {
+                        const response = await fetch(form.action, {
+                            method: 'POST',
+                            body: formData,
+                            headers: {
+                                'X-Requested-With': 'XMLHttpRequest',
+                                'Accept': 'application/json'
+                            }
+                        });
+                        
+                        if (response.ok) {
+                            // Success - close modal and reload page
+                            const modal = bootstrap.Modal.getInstance(document.getElementById('editAgendaModal'));
+                            if (modal) {
+                                modal.hide();
+                            }
+                            
+                            // Show success message
+                            const successAlert = document.createElement('div');
+                            successAlert.className = 'alert alert-success alert-dismissible fade show';
+                            successAlert.innerHTML = '<strong>Berhasil!</strong> Agenda berhasil diupdate!';
+                            document.querySelector('.container-fluid').insertBefore(successAlert, document.querySelector('.container-fluid').firstChild);
+                            
+                            // Reload page after short delay
+                            setTimeout(() => {
+                                location.reload();
+                            }, 1000);
+                        } else {
+                            // Handle validation errors
+                            const contentType = response.headers.get('content-type');
+                            let errorMessage = 'Gagal mengupdate agenda. Silakan coba lagi.';
+                            
+                            if (contentType && contentType.includes('application/json')) {
+                                const errorData = await response.json();
+                                if (errorData.errors) {
+                                    const errors = Object.values(errorData.errors).flat();
+                                    errorMessage = errors.join(', ');
+                                } else if (errorData.message) {
+                                    errorMessage = errorData.message;
+                                }
+                            } else {
+                                const text = await response.text();
+                                console.error('Error response:', text);
+                            }
+                            
+                            alert(errorMessage);
+                            
+                            // Re-enable submit button
+                            submitBtn.disabled = false;
+                            submitBtn.innerHTML = originalBtnText;
+                        }
+                    } catch (error) {
+                        console.error('Error updating agenda:', error);
+                        alert('Terjadi kesalahan saat mengupdate agenda. Silakan coba lagi.');
+                        
+                        // Re-enable submit button
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = originalBtnText;
+                    }
                 });
             }
             

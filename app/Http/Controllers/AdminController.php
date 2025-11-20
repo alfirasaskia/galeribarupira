@@ -792,28 +792,71 @@ class AdminController extends Controller
 
     public function agendaUpdate(Request $request, $id)
     {
-        $request->validate([
-            'judul' => 'required|string|max:255',
-            'deskripsi' => 'nullable|string',
-            'tanggal' => 'required|date',
-            'waktu_mulai' => 'nullable|date_format:H:i',
-            'waktu_selesai' => 'nullable|date_format:H:i',
-            'lokasi' => 'nullable|string',
-            'status' => 'required|in:aktif,draft,selesai'
-        ]);
+        $isAjax = $request->ajax() || $request->wantsJson() || $request->header('X-Requested-With') === 'XMLHttpRequest';
         
-        DB::table('agenda')->where('id', $id)->update([
-            'judul' => $request->judul,
-            'deskripsi' => $request->deskripsi,
-            'tanggal' => $request->tanggal,
-            'waktu_mulai' => $request->waktu_mulai,
-            'waktu_selesai' => $request->waktu_selesai,
-            'lokasi' => $request->lokasi,
-            'status' => $request->status,
-            'updated_at' => now()
-        ]);
-        
-        return redirect()->route('admin.agenda.index')->with('success', 'Agenda berhasil diupdate!');
+        try {
+            $validated = $request->validate([
+                'judul' => 'required|string|max:255',
+                'deskripsi' => 'nullable|string',
+                'tanggal' => 'required|date',
+                'waktu_mulai' => 'nullable|date_format:H:i',
+                'waktu_selesai' => 'nullable|date_format:H:i',
+                'lokasi' => 'nullable|string',
+                'status' => 'required|in:aktif,draft,selesai'
+            ]);
+            
+            $updated = DB::table('agenda')->where('id', $id)->update([
+                'judul' => $request->judul,
+                'deskripsi' => $request->deskripsi,
+                'tanggal' => $request->tanggal,
+                'waktu_mulai' => $request->waktu_mulai,
+                'waktu_selesai' => $request->waktu_selesai,
+                'lokasi' => $request->lokasi,
+                'status' => $request->status,
+                'updated_at' => now()
+            ]);
+            
+            if ($updated) {
+                if ($isAjax) {
+                    return response()->json([
+                        'success' => true,
+                        'message' => 'Agenda berhasil diupdate!'
+                    ], 200);
+                }
+                return redirect()->route('admin.agenda.index')->with('success', 'Agenda berhasil diupdate!');
+            } else {
+                if ($isAjax) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Agenda tidak ditemukan atau tidak ada perubahan'
+                    ], 404);
+                }
+                return redirect()->route('admin.agenda.index')->with('error', 'Agenda tidak ditemukan.');
+            }
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            if ($isAjax) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Validasi gagal',
+                    'errors' => $e->errors()
+                ], 422);
+            }
+            return back()->withErrors($e->errors())->withInput();
+        } catch (\Exception $e) {
+            \Log::error('Error updating agenda', [
+                'id' => $id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            if ($isAjax) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Terjadi kesalahan saat mengupdate agenda: ' . $e->getMessage()
+                ], 500);
+            }
+            return redirect()->route('admin.agenda.index')->with('error', 'Terjadi kesalahan saat mengupdate agenda.');
+        }
     }
 
     public function agendaDestroy($id)
