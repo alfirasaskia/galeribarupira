@@ -184,30 +184,54 @@ class AuthController extends Controller
     // Process registration - KHUSUS USER GALERI
     public function processRegister(Request $request)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email',
-            'password' => 'required|min:6|confirmed'
-        ], [
-            'name.required' => 'Nama lengkap harus diisi',
-            'email.required' => 'Email harus diisi',
-            'email.email' => 'Format email tidak valid',
-            'email.unique' => 'Email sudah terdaftar. Silakan gunakan email lain atau login jika sudah memiliki akun.',
-            'password.required' => 'Password harus diisi',
-            'password.min' => 'Password minimal 6 karakter',
-            'password.confirmed' => 'Konfirmasi password tidak cocok'
+        \Log::info('🔵 [REGISTER] Registration request received', [
+            'email' => $request->email,
+            'name' => $request->name,
+            'is_ajax' => $request->ajax() || $request->wantsJson(),
+            'ip' => $request->ip()
         ]);
         
+        $isAjax = $request->ajax() || $request->wantsJson() || $request->header('X-Requested-With') === 'XMLHttpRequest';
+        
         try {
+            $validated = $request->validate([
+                'name' => 'required|string|max:255|min:3',
+                'email' => 'required|email|unique:users,email',
+                'password' => 'required|min:6|confirmed'
+            ], [
+                'name.required' => 'Nama lengkap harus diisi',
+                'name.min' => 'Nama minimal 3 karakter',
+                'name.max' => 'Nama maksimal 255 karakter',
+                'email.required' => 'Email harus diisi',
+                'email.email' => 'Format email tidak valid',
+                'email.unique' => 'Email sudah terdaftar. Silakan gunakan email lain atau login jika sudah memiliki akun.',
+                'password.required' => 'Password harus diisi',
+                'password.min' => 'Password minimal 6 karakter',
+                'password.confirmed' => 'Konfirmasi password tidak cocok'
+            ]);
+            
+            \Log::info('✅ [REGISTER] Validation passed', ['email' => $request->email]);
+            
             // Cek apakah email sudah terdaftar dan TERVERIFIKASI
             $existingUser = DB::table('users')->where('email', $request->email)->whereNotNull('email_verified_at')->first();
             if ($existingUser) {
-                return back()->withErrors(['email' => 'Email sudah terdaftar. Silakan login jika Anda sudah memiliki akun.'])->withInput();
+                \Log::warning('⚠️ [REGISTER] Email already verified', ['email' => $request->email]);
+                $error = ['email' => 'Email sudah terdaftar. Silakan login jika Anda sudah memiliki akun.'];
+                
+                if ($isAjax) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Email sudah terdaftar',
+                        'errors' => $error
+                    ], 422);
+                }
+                return back()->withErrors($error)->withInput();
             }
             
             // Jika email ada tapi belum terverifikasi, hapus user lama dan OTP-nya
             $unverifiedUser = DB::table('users')->where('email', $request->email)->whereNull('email_verified_at')->first();
             if ($unverifiedUser) {
+                \Log::info('🔵 [REGISTER] Removing unverified user', ['user_id' => $unverifiedUser->id]);
                 // Hapus OTP yang terkait
                 DB::table('otps')->where('user_id', $unverifiedUser->id)->delete();
                 // Hapus user yang belum terverifikasi
@@ -224,8 +248,11 @@ class AuthController extends Controller
                 'updated_at' => now()
             ]);
             
+            \Log::info('✅ [REGISTER] User created', ['user_id' => $userId, 'email' => $request->email]);
+            
             // Generate OTP 6 digit
             $otpCode = Otp::generateCode();
+            \Log::info('🔵 [REGISTER] OTP generated', ['user_id' => $userId, 'otp_code' => $otpCode]);
             
             // Simpan OTP ke database
             Otp::create([
@@ -235,10 +262,11 @@ class AuthController extends Controller
                 'expires_at' => now()->addMinutes(10) // Berlaku 10 menit
             ]);
             
+            \Log::info('✅ [REGISTER] OTP saved to database', ['user_id' => $userId]);
+            
             // Kirim OTP ke email
-            \Log::info('Attempting to send OTP email', [
+            \Log::info('🔵 [REGISTER] Attempting to send OTP email', [
                 'email' => $request->email,
-                'otp_code' => $otpCode,
                 'user_id' => $userId,
                 'mail_mailer' => config('mail.default'),
                 'mail_host' => config('mail.mailers.smtp.host'),
@@ -247,14 +275,27 @@ class AuthController extends Controller
             
             try {
                 Mail::to($request->email)->send(new SendOtpMail($otpCode, $request->name));
-                \Log::info('OTP email sent successfully', ['email' => $request->email]);
+                \Log::info('✅ [REGISTER] OTP email sent successfully', ['email' => $request->email]);
             } catch (\Exception $mailException) {
-                \Log::error('Failed to send OTP email', [
+                \Log::error('❌ [REGISTER] Failed to send OTP email', [
                     'email' => $request->email,
                     'error' => $mailException->getMessage(),
                     'trace' => $mailException->getTraceAsString()
                 ]);
-                throw $mailException;
+                
+                // Delete user if email sending fails
+                DB::table('users')->where('id', $userId)->delete();
+                DB::table('otps')->where('user_id', $userId)->delete();
+                
+                $error = ['error' => 'Gagal mengirim email verifikasi. Silakan coba lagi.'];
+                if ($isAjax) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Gagal mengirim email verifikasi',
+                        'errors' => $error
+                    ], 500);
+                }
+                return back()->withErrors($error)->withInput();
             }
             
             // Simpan data user ke session untuk proses verifikasi
@@ -264,33 +305,93 @@ class AuthController extends Controller
                 'pending_verification_user_email' => $request->email
             ]);
             
+            \Log::info('✅ [REGISTER] Registration completed successfully', [
+                'user_id' => $userId,
+                'email' => $request->email
+            ]);
+            
             // Redirect ke halaman verifikasi OTP
-            return redirect()->route('verify.otp')->with('success', 'Registrasi berhasil! Kode OTP telah dikirim ke email Anda. Silakan cek email dan masukkan kode verifikasi.');
+            $redirectUrl = route('verify.otp');
+            $successMessage = 'Registrasi berhasil! Kode OTP telah dikirim ke email Anda. Silakan cek email dan masukkan kode verifikasi.';
+            
+            if ($isAjax) {
+                return response()->json([
+                    'success' => true,
+                    'message' => $successMessage,
+                    'redirect' => $redirectUrl
+                ], 200);
+            }
+            
+            return redirect($redirectUrl)->with('success', $successMessage);
+            
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            \Log::warning('⚠️ [REGISTER] Validation failed', [
+                'errors' => $e->errors(),
+                'email' => $request->email
+            ]);
+            
+            if ($isAjax) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Validasi gagal',
+                    'errors' => $e->errors()
+                ], 422);
+            }
+            
+            return back()->withErrors($e->errors())->withInput();
             
         } catch (\Illuminate\Database\QueryException $e) {
             // Handle database errors (duplicate entry, etc)
-            if ($e->getCode() == 23000) {
-                // Duplicate entry error
-                return back()->withErrors(['email' => 'Email sudah terdaftar. Silakan gunakan email lain atau login jika sudah memiliki akun.'])->withInput();
-            }
-            
-            // Log error untuk debugging
-            \Log::error('Registration error', [
+            \Log::error('❌ [REGISTER] Database error', [
                 'email' => $request->email,
                 'error' => $e->getMessage(),
-                'code' => $e->getCode()
+                'code' => $e->getCode(),
+                'sql_state' => $e->errorInfo[0] ?? null
             ]);
             
-            return back()->withErrors(['error' => 'Terjadi kesalahan saat mendaftar. Silakan coba lagi.'])->withInput();
+            if ($e->getCode() == 23000) {
+                // Duplicate entry error
+                $error = ['email' => 'Email sudah terdaftar. Silakan gunakan email lain atau login jika sudah memiliki akun.'];
+                
+                if ($isAjax) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Email sudah terdaftar',
+                        'errors' => $error
+                    ], 422);
+                }
+                return back()->withErrors($error)->withInput();
+            }
+            
+            $error = ['error' => 'Terjadi kesalahan saat mendaftar. Silakan coba lagi.'];
+            if ($isAjax) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Terjadi kesalahan saat mendaftar',
+                    'errors' => $error
+                ], 500);
+            }
+            return back()->withErrors($error)->withInput();
+            
         } catch (\Exception $e) {
             // Log error untuk debugging
-            \Log::error('Registration error', [
+            \Log::error('❌ [REGISTER] Unexpected error', [
                 'email' => $request->email,
                 'error' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
                 'trace' => $e->getTraceAsString()
             ]);
             
-            return back()->withErrors(['error' => 'Terjadi kesalahan saat mendaftar. Silakan coba lagi.'])->withInput();
+            $error = ['error' => 'Terjadi kesalahan saat mendaftar. Silakan coba lagi.'];
+            if ($isAjax) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Terjadi kesalahan saat mendaftar',
+                    'errors' => $error
+                ], 500);
+            }
+            return back()->withErrors($error)->withInput();
         }
     }
 }

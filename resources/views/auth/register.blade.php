@@ -778,80 +778,291 @@
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
-        // Debug: Log ketika page loaded
-        console.log('Register page loaded');
+        // ============================================
+        // REGISTER FORM VALIDATION & SUBMISSION
+        // ============================================
+        console.log('🔵 [REGISTER] Script loaded');
         
-        // Form validation
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('DOM Content Loaded');
+            console.log('🔵 [REGISTER] DOM Content Loaded');
+            
             const form = document.getElementById('registerForm');
             const submitBtn = document.querySelector('.btn-register');
             
-            console.log('Form element:', form);
-            console.log('Submit button:', submitBtn);
+            console.log('🔵 [REGISTER] Form element:', form ? 'Found' : 'NOT FOUND');
+            console.log('🔵 [REGISTER] Submit button:', submitBtn ? 'Found' : 'NOT FOUND');
             
             if (!form) {
-                console.error('Form tidak ditemukan!');
+                console.error('❌ [REGISTER] Form tidak ditemukan!');
                 return;
             }
             
-            // Test button click
-            if (submitBtn) {
-                submitBtn.addEventListener('click', function(e) {
-                    console.log('Button clicked!', e);
+            // ============================================
+            // CLIENT-SIDE VALIDATION
+            // ============================================
+            function validateForm() {
+                console.log('🔵 [REGISTER] Starting client-side validation...');
+                
+            let isValid = true;
+                const errors = {};
+            
+            // Clear previous errors
+                document.querySelectorAll('.error-message').forEach(el => {
+                    el.classList.remove('show');
+                    el.textContent = '';
                 });
+            
+            // Validate name
+            const name = document.getElementById('name').value.trim();
+                console.log('🔵 [REGISTER] Validating name:', name);
+                if (!name) {
+                    errors.name = 'Nama lengkap harus diisi';
+                    isValid = false;
+                } else if (name.length < 3) {
+                    errors.name = 'Nama minimal 3 karakter';
+                    isValid = false;
+                } else if (name.length > 255) {
+                    errors.name = 'Nama maksimal 255 karakter';
+                isValid = false;
             }
             
-            form.addEventListener('submit', function(e) {
-                console.log('Form submit event triggered');
-                let isValid = true;
-                
-                // Clear previous errors
-                document.querySelectorAll('.error-message').forEach(el => el.classList.remove('show'));
-                
-                // Validate name
-                const name = document.getElementById('name').value.trim();
-                if (name.length < 3) {
-                    document.getElementById('nameError').textContent = 'Nama minimal 3 karakter';
-                    document.getElementById('nameError').classList.add('show');
+            // Validate email
+            const email = document.getElementById('email').value.trim();
+                console.log('🔵 [REGISTER] Validating email:', email);
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!email) {
+                    errors.email = 'Email harus diisi';
                     isValid = false;
+                } else if (!emailRegex.test(email)) {
+                    errors.email = 'Format email tidak valid';
+                isValid = false;
+            }
+            
+            // Validate password
+            const password = document.getElementById('password').value;
+                console.log('🔵 [REGISTER] Validating password length:', password.length);
+                if (!password) {
+                    errors.password = 'Password harus diisi';
+                    isValid = false;
+                } else if (password.length < 6) {
+                    errors.password = 'Password minimal 6 karakter';
+                isValid = false;
+            }
+            
+            // Validate password confirmation
+            const passwordConfirm = document.getElementById('password_confirmation').value;
+                console.log('🔵 [REGISTER] Validating password confirmation');
+                if (!passwordConfirm) {
+                    errors.password_confirmation = 'Konfirmasi password harus diisi';
+                    isValid = false;
+                } else if (password !== passwordConfirm) {
+                    errors.password_confirmation = 'Konfirmasi password tidak cocok';
+                isValid = false;
+            }
+            
+                // Display errors
+                if (errors.name) {
+                    const nameError = document.getElementById('nameError');
+                    nameError.textContent = errors.name;
+                    nameError.classList.add('show');
+                }
+                if (errors.email) {
+                    const emailError = document.getElementById('emailError');
+                    emailError.textContent = errors.email;
+                    emailError.classList.add('show');
+                }
+                if (errors.password) {
+                    const passwordError = document.getElementById('passwordError');
+                    passwordError.textContent = errors.password;
+                    passwordError.classList.add('show');
+                }
+                if (errors.password_confirmation) {
+                    const confirmError = document.getElementById('confirmError');
+                    confirmError.textContent = errors.password_confirmation;
+                    confirmError.classList.add('show');
                 }
                 
-                // Validate email
-                const email = document.getElementById('email').value.trim();
-                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                if (!emailRegex.test(email)) {
-                    document.getElementById('emailError').textContent = 'Format email tidak valid';
-                    document.getElementById('emailError').classList.add('show');
-                    isValid = false;
+                console.log('🔵 [REGISTER] Validation result:', isValid ? '✅ VALID' : '❌ INVALID');
+            if (!isValid) {
+                    console.log('🔵 [REGISTER] Validation errors:', errors);
                 }
                 
-                // Validate password
-                const password = document.getElementById('password').value;
-                if (password.length < 6) {
-                    document.getElementById('passwordError').textContent = 'Password minimal 6 karakter';
-                    document.getElementById('passwordError').classList.add('show');
-                    isValid = false;
+                return isValid;
+            }
+            
+            // ============================================
+            // FORM SUBMISSION HANDLER
+            // ============================================
+            form.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                console.log('🔵 [REGISTER] Form submit event triggered');
+                
+                // Client-side validation
+                if (!validateForm()) {
+                    console.log('❌ [REGISTER] Client-side validation failed, preventing submission');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Validasi Gagal',
+                    text: 'Mohon periksa kembali form registrasi Anda',
+                        confirmButtonColor: '#1E40AF'
+                    });
+                    return;
                 }
                 
-                // Validate password confirmation
-                const passwordConfirm = document.getElementById('password_confirmation').value;
-                if (password !== passwordConfirm) {
-                    document.getElementById('confirmError').textContent = 'Konfirmasi password tidak cocok';
-                    document.getElementById('confirmError').classList.add('show');
-                    isValid = false;
+                console.log('✅ [REGISTER] Client-side validation passed');
+                
+                // Disable submit button
+                if (submitBtn) {
+                    submitBtn.disabled = true;
+                    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Mendaftar...';
                 }
                 
-                if (!isValid) {
-                    e.preventDefault();
+                // Get form data
+                const formData = new FormData(form);
+                const formDataObj = {};
+                formData.forEach((value, key) => {
+                    formDataObj[key] = key === 'password' || key === 'password_confirmation' ? '***' : value;
+                });
+                console.log('🔵 [REGISTER] Form data prepared:', formDataObj);
+                console.log('🔵 [REGISTER] Submitting to:', form.action);
+                
+                try {
+                    const response = await fetch(form.action, {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'Accept': 'application/json'
+                        }
+                    });
+                    
+                    console.log('🔵 [REGISTER] Response received:', {
+                        status: response.status,
+                        statusText: response.statusText,
+                        ok: response.ok,
+                        headers: Object.fromEntries(response.headers.entries())
+                    });
+                    
+                    const contentType = response.headers.get('content-type');
+                    console.log('🔵 [REGISTER] Response content-type:', contentType);
+                    
+                    if (response.ok) {
+                        // Check if it's a redirect (HTML response)
+                        if (contentType && contentType.includes('text/html')) {
+                            const text = await response.text();
+                            console.log('🔵 [REGISTER] HTML response received, redirecting...');
+                            // If response contains redirect, follow it
+                            window.location.href = response.url;
+                            return;
+                        }
+                        
+                        // Try to parse JSON response
+                        if (contentType && contentType.includes('application/json')) {
+                            const data = await response.json();
+                            console.log('✅ [REGISTER] Success response:', data);
+                            
+                            if (data.redirect) {
+                                console.log('🔵 [REGISTER] Redirecting to:', data.redirect);
+                                window.location.href = data.redirect;
+                            } else {
+                                // Show success message
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Registrasi Berhasil!',
+                                    text: data.message || 'Silakan cek email Anda untuk verifikasi',
+                                    confirmButtonColor: '#1E40AF'
+                                }).then(() => {
+                                    if (data.redirect) {
+                                        window.location.href = data.redirect;
+                                    }
+                                });
+                            }
+                        } else {
+                            // Assume success and redirect
+                            console.log('🔵 [REGISTER] Non-JSON success response, reloading page...');
+                            window.location.reload();
+                        }
+                    } else {
+                        // Handle error response
+                        let errorMessage = 'Terjadi kesalahan saat mendaftar. Silakan coba lagi.';
+                        
+                        if (contentType && contentType.includes('application/json')) {
+                            try {
+                                const errorData = await response.json();
+                                console.log('❌ [REGISTER] Error response:', errorData);
+                                
+                                if (errorData.message) {
+                                    errorMessage = errorData.message;
+                                } else if (errorData.errors) {
+                                    // Laravel validation errors
+                                    const errors = Object.values(errorData.errors).flat();
+                                    errorMessage = errors.join(', ');
+                                    
+                                    // Display field-specific errors
+                                    if (errorData.errors.name) {
+                                        const nameError = document.getElementById('nameError');
+                                        nameError.textContent = errorData.errors.name[0];
+                                        nameError.classList.add('show');
+                                    }
+                                    if (errorData.errors.email) {
+                                        const emailError = document.getElementById('emailError');
+                                        emailError.textContent = errorData.errors.email[0];
+                                        emailError.classList.add('show');
+                                    }
+                                    if (errorData.errors.password) {
+                                        const passwordError = document.getElementById('passwordError');
+                                        passwordError.textContent = errorData.errors.password[0];
+                                        passwordError.classList.add('show');
+                                    }
+                                }
+                            } catch (parseError) {
+                                console.error('❌ [REGISTER] Error parsing JSON:', parseError);
+                            }
+                        } else {
+                            // Try to get text response
+                            try {
+                                const text = await response.text();
+                                console.log('❌ [REGISTER] Error text response:', text.substring(0, 200));
+                            } catch (textError) {
+                                console.error('❌ [REGISTER] Error reading text:', textError);
+                            }
+                        }
+                        
+                        console.error('❌ [REGISTER] Registration failed:', errorMessage);
+                        
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Registrasi Gagal',
+                            text: errorMessage,
+                            confirmButtonColor: '#1E40AF'
+                        });
+                        
+                        // Re-enable submit button
+                        if (submitBtn) {
+                            submitBtn.disabled = false;
+                            submitBtn.innerHTML = 'Sign Up';
+                        }
+                    }
+                } catch (error) {
+                    console.error('❌ [REGISTER] Network/Request error:', error);
+                    console.error('❌ [REGISTER] Error details:', {
+                        message: error.message,
+                        stack: error.stack
+                    });
+                    
                     Swal.fire({
                         icon: 'error',
-                        title: 'Validasi Gagal',
-                        text: 'Mohon periksa kembali form registrasi Anda',
-                        confirmButtonColor: '#667eea'
+                        title: 'Koneksi Error',
+                        text: 'Gagal terhubung ke server. Silakan cek koneksi internet Anda dan coba lagi.',
+                        confirmButtonColor: '#1E40AF'
                     });
+                    
+                    // Re-enable submit button
+                    if (submitBtn) {
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = 'Sign Up';
+                    }
                 }
-            });
         });
 
         // Toggle show/hide password fields
@@ -886,29 +1097,29 @@
             
             function togglePasswordVisibility(btn) {
                 const targetId = btn.getAttribute('data-target');
-                const input = document.getElementById(targetId);
+                    const input = document.getElementById(targetId);
                 if (!input) {
                     console.error('Input not found:', targetId);
                     return;
                 }
 
                 const icon = btn.querySelector('i');
-                if (input.type === 'password') {
-                    input.type = 'text';
-                    if (icon) {
-                        icon.classList.remove('fa-eye-slash');
-                        icon.classList.add('fa-eye');
-                    }
+                    if (input.type === 'password') {
+                        input.type = 'text';
+                        if (icon) {
+                            icon.classList.remove('fa-eye-slash');
+                            icon.classList.add('fa-eye');
+                        }
                     console.log('Password shown for:', targetId);
-                } else {
-                    input.type = 'password';
-                    if (icon) {
-                        icon.classList.remove('fa-eye');
-                        icon.classList.add('fa-eye-slash');
+                    } else {
+                        input.type = 'password';
+                        if (icon) {
+                            icon.classList.remove('fa-eye');
+                            icon.classList.add('fa-eye-slash');
                     }
                     console.log('Password hidden for:', targetId);
-                }
-            }
+                        }
+                    }
         });
 
         // Show success message if exists
